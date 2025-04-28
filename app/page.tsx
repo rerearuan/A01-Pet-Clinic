@@ -35,27 +35,7 @@ export default function HomePage() {
 
       {/* Overlay untuk konten */}
       <div className="relative z-10 flex flex-col min-h-screen">
-        {/* Header */}
-        <header className="flex items-center justify-between px-8 py-4 bg-white/70 backdrop-blur-md shadow-sm">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🐾</span>
-            <h1 className="text-xl font-bold">Pet Clinic</h1>
-          </div>
-          <div className="space-x-4">
-            <Link
-              href="/register"
-              className="bg-black text-white py-2 px-4 rounded-lg font-semibold hover:bg-gray-800 transition"
-            >
-              Register
-            </Link>
-            <Link
-            href="/login"
-            className="bg-black text-white py-2 px-4 rounded-lg font-semibold hover:bg-gray-800 transition inline-block text-center"
-          >
-            Log in
-          </Link>
-          </div>
-        </header>
+
 
         {/* Hero Section */}
         <div className="flex flex-1 items-center justify-start px-16 py-20">
