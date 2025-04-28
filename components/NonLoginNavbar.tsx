@@ -1,9 +1,11 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react'; 
 
 export default function NonLoginNavbar() {
   const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State untuk mobile menu
 
   const activeClass = "text-[#FD7E14] border-b-2 border-[#FD7E14]";
   const inactiveClass = "text-gray-900 hover:text-[#FD7E14]";
@@ -24,16 +26,30 @@ export default function NonLoginNavbar() {
             <span className="ml-2 text-l font-bold text-[#000000]">Pet Clinic</span>
           </div>
 
-          {/* Main Navigation */}
-          <div className="flex items-center space-x-4 md:flex-row flex-col mt-4 md:mt-0">
-            {/* Register Button */}
+          {/* Hamburger Button */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-black focus:outline-none"
+            >
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isMobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
+
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center space-x-4">
             <Link
               href="/register"
-              className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors mb-4 md:mb-0"
+              className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
             >
               Register
             </Link>
-            {/* Login Button */}
             <Link
               href="/login"
               className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
@@ -42,6 +58,23 @@ export default function NonLoginNavbar() {
             </Link>
           </div>
         </div>
+
+        {isMobileMenuOpen && (
+          <div className="md:hidden absolute top-20 left-0 right-0 bg-white shadow-md flex flex-col space-y-4 p-4 z-50">
+            <Link
+              href="/register"
+              className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors w-full text-center"
+            >
+              Register
+            </Link>
+            <Link
+              href="/login"
+              className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors w-full text-center"
+            >
+              Login
+            </Link>
+          </div>
+        )}
       </div>
     </nav>
   );
