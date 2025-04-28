@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 type Vaccination = {
   id: number;
@@ -30,45 +31,45 @@ export default function VaccinationPage() {
   const [selectedVaccination, setSelectedVaccination] = useState<Vaccination | null>(null);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-10">
-      <div className="max-w-7xl mx-auto bg-white p-8 rounded-2xl shadow-xl">
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-7xl mx-auto bg-white p-8 rounded-2xl shadow-md">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-extrabold text-gray-800">List Vacctination</h1>
+          <h1 className="text-4xl font-bold text-gray-800">List Perawatan</h1>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="bg-black hover:bg-gray-900 text-white font-semibold px-6 py-3 rounded-xl transition"
+            className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-3 rounded-lg transition"
           >
-            + Create New Vaccination
+            + Create New Treatment
           </button>
         </div>
 
         {/* Table */}
         <div className="overflow-x-auto rounded-xl border border-gray-200">
           <table className="min-w-full text-sm text-gray-700">
-            <thead className="bg-gray-100 text-gray-600 uppercase tracking-wider">
+            <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
               <tr>
-                <th className="py-4 px-6 text-center">No</th>
-                <th className="py-4 px-6 text-left">Kunjungan</th>
-                <th className="py-4 px-6 text-left">Tanggal Kunjungan</th>
-                <th className="py-4 px-6 text-left">Vaksin</th>
-                <th className="py-4 px-6 text-center">Action</th>
+                <th className="py-4 px-6 text-center">NO</th>
+                <th className="py-4 px-6 text-left">KUNJUNGAN</th>
+                <th className="py-4 px-6 text-left">TANGGAL KUNJUNGAN</th>
+                <th className="py-4 px-6 text-left">VAKSIN</th>
+                <th className="py-4 px-6 text-center">ACTION</th>
               </tr>
             </thead>
             <tbody>
               {vaccinations.map((vaksin, index) => (
                 <tr key={vaksin.id} className="border-t hover:bg-gray-50">
-                  <td className="py-5 px-6 text-center">{index + 1}</td>
-                  <td className="py-5 px-6">{vaksin.kunjungan}</td>
-                  <td className="py-5 px-6">{vaksin.tanggalKunjungan}</td>
-                  <td className="py-5 px-6">{vaksin.vaksin}</td>
-                  <td className="py-5 px-6 flex justify-center space-x-3">
+                  <td className="py-4 px-6 text-center">{index + 1}</td>
+                  <td className="py-4 px-6">{vaksin.kunjungan}</td>
+                  <td className="py-4 px-6">{vaksin.tanggalKunjungan}</td>
+                  <td className="py-4 px-6">{vaksin.vaksin}</td>
+                  <td className="py-4 px-6 flex justify-center gap-2">
                     <button
                       onClick={() => {
                         setSelectedVaccination(vaksin);
                         setShowUpdateModal(true);
                       }}
-                      className="bg-black hover:bg-gray-800 text-white px-5 py-2 rounded-lg text-xs font-semibold transition"
+                      className="bg-black hover:bg-gray-800 text-white px-4 py-2 text-xs rounded-lg transition"
                     >
                       Update
                     </button>
@@ -77,7 +78,7 @@ export default function VaccinationPage() {
                         setSelectedVaccination(vaksin);
                         setShowDeleteModal(true);
                       }}
-                      className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-lg text-xs font-semibold transition"
+                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 text-xs rounded-lg transition"
                     >
                       Delete
                     </button>
@@ -90,94 +91,96 @@ export default function VaccinationPage() {
 
         {/* Modals */}
         {showCreateModal && <CreateModal onClose={() => setShowCreateModal(false)} />}
-        {showUpdateModal && selectedVaccination && <UpdateModal vaksin={selectedVaccination} onClose={() => setShowUpdateModal(false)} />}
-        {showDeleteModal && selectedVaccination && <DeleteModal vaksin={selectedVaccination} onClose={() => setShowDeleteModal(false)} />}
+        {showUpdateModal && selectedVaccination && (
+          <UpdateModal vaksin={selectedVaccination} onClose={() => setShowUpdateModal(false)} />
+        )}
+        {showDeleteModal && selectedVaccination && (
+          <DeleteModal vaksin={selectedVaccination} onClose={() => setShowDeleteModal(false)} />
+        )}
       </div>
     </div>
   );
 }
 
-/* --- Create Modal Component --- */
+/* --- Create Modal --- */
 function CreateModal({ onClose }: { onClose: () => void }) {
   return (
-    <ModalWrapper title="Create New Vaccination" onClose={onClose}>
+    <ModalWrapper title="Create New Treatment" onClose={onClose}>
       <DropdownField label="Kunjungan" options={kunjunganOptions} />
-      <DropdownField label="Vaksin" options={vaksinOptions.map(v => `${v.kode} - ${v.nama} [${v.stok}]`)} />
-      <ModalActions onClose={onClose} actionLabel="Create" actionColor="bg-black" />
+      <DropdownField label="Vaksin" options={vaksinOptions.map(v => `${v.kode} - ${v.nama} [Stok ${v.stok}]`)} />
+      <ModalActions onClose={onClose} actionLabel="Create" actionColor="bg-orange-500" />
     </ModalWrapper>
   );
 }
 
-/* --- Update Modal Component --- */
+/* --- Update Modal --- */
 function UpdateModal({ vaksin, onClose }: { vaksin: Vaccination; onClose: () => void }) {
   return (
-    <ModalWrapper title="Update Vaccination" onClose={onClose}>
+    <ModalWrapper title="Update Treatment" onClose={onClose}>
       <DropdownField label="Kunjungan" options={kunjunganOptions} selected={vaksin.kunjungan} />
-      <DropdownField label="Vaksin" options={vaksinOptions.map(v => `${v.kode} - ${v.nama} [${v.stok}]`)} selected={vaksin.vaksin} />
+      <DropdownField label="Vaksin" options={vaksinOptions.map(v => `${v.kode} - ${v.nama} [Stok ${v.stok}]`)} selected={vaksin.vaksin} />
       <ModalActions onClose={onClose} actionLabel="Update" actionColor="bg-black" />
     </ModalWrapper>
   );
 }
 
-/* --- Delete Modal Component --- */
+/* --- Delete Modal --- */
 function DeleteModal({ vaksin, onClose }: { vaksin: Vaccination; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/30">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-96 space-y-6 text-center">
-        <h2 className="text-2xl font-bold text-red-600">Delete Vaccination</h2>
-        <p className="text-gray-700">
-          Apakah kamu yakin ingin menghapus Vaksinasi untuk <b className="text-red-600">{vaksin.kunjungan}</b> dengan <b className="text-red-600">{vaksin.vaksin}</b>?
-        </p>
-        <div className="flex justify-center space-x-3 pt-4">
-          <button onClick={onClose} className="border px-4 py-2 rounded-lg">Cancel</button>
-          <button className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg">
-            Confirm Deletion
-          </button>
-        </div>
+    <ModalWrapper title="Delete Treatment" onClose={onClose}>
+      <p className="text-center text-gray-600 mb-6">
+        Yakin mau hapus vaksin <b>{vaksin.vaksin}</b> dari kunjungan <b>{vaksin.kunjungan}</b>?
+      </p>
+      <div className="flex justify-center gap-4">
+        <button onClick={onClose} className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg">
+          Cancel
+        </button>
+        <button className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg">
+          Delete
+        </button>
       </div>
-    </div>
+    </ModalWrapper>
   );
 }
 
-/* --- Modal Wrapper (Reusable) --- */
-function ModalWrapper({ title, onClose, children }: { title: string, onClose: () => void, children: React.ReactNode }) {
+/* --- Modal Wrapper --- */
+function ModalWrapper({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/30">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-96 space-y-6">
-        <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
+    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50 p-4">
+      <div className="bg-white w-full max-w-md rounded-2xl p-8 shadow-xl space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+        </div>
         {children}
       </div>
     </div>
   );
 }
 
-/* --- DropdownField (Reusable) --- */
-function DropdownField({ label, options, selected }: { label: string, options: string[], selected?: string }) {
+/* --- Dropdown Field --- */
+function DropdownField({ label, options, selected }: { label: string; options: string[]; selected?: string }) {
   return (
     <div className="space-y-2">
-      <label className="text-gray-600">{label}</label>
+      <label className="text-gray-600 font-semibold">{label}</label>
       <select
-        defaultValue={selected}
-        className="w-full border p-2 rounded text-gray-900"
+        defaultValue={selected || ''}
+        className="w-full border border-gray-300 p-3 rounded-lg text-gray-900"
       >
-        <option disabled value="">
-          Pilih {label}
-        </option>
+        <option disabled value="">Pilih {label}</option>
         {options.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt}
-          </option>
+          <option key={opt} value={opt}>{opt}</option>
         ))}
       </select>
     </div>
   );
 }
 
-/* --- Modal Actions (Reusable) --- */
-function ModalActions({ onClose, actionLabel, actionColor }: { onClose: () => void, actionLabel: string, actionColor: string }) {
+/* --- Modal Actions --- */
+function ModalActions({ onClose, actionLabel, actionColor }: { onClose: () => void; actionLabel: string; actionColor: string }) {
   return (
-    <div className="flex justify-end space-x-3 pt-4">
-      <button onClick={onClose} className="border px-4 py-2 rounded-lg">
+    <div className="flex justify-end gap-4 pt-6">
+      <button onClick={onClose} className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg">
         Cancel
       </button>
       <button className={`${actionColor} hover:opacity-90 text-white px-6 py-2 rounded-lg`}>
