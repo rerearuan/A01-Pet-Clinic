@@ -1,11 +1,12 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 
-interface Pet { key: string; pemilik: string; jenis: string; nama: string; tanggal_lahir: string; url_foto: string; }
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { PlusIcon, EditIcon, TrashIcon } from '../../components/Icons';
+
+type Pet = { key: string; pemilik: string; jenis: string; nama: string; tanggal_lahir: string; url_foto: string };
 export default function ListPets() {
   const [pets, setPets] = useState<Pet[]>([]);
-  const router = useRouter();
 
   useEffect(() => {
     setPets([
@@ -16,34 +17,53 @@ export default function ListPets() {
   }, []);
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">List Hewan Peliharaan</h1>
-      <button onClick={() => router.push('/hewan-peliharaan/create')} className="mb-4 px-4 py-2 bg-black text-white rounded-lg">
-        + Create New Pet
-      </button>
-      <table className="min-w-full table-auto">
-        <thead>
-          <tr>
-            <th>No</th><th>Pemilik</th><th>Jenis Hewan</th><th>Nama Hewan</th><th>Tanggal Lahir</th><th>Foto</th><th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {pets.map((p, i) => (
-            <tr key={p.key} className="border-t">
-              <td className="px-4 py-2">{i+1}</td>
-              <td className="px-4 py-2">{p.pemilik}</td>
-              <td className="px-4 py-2">{p.jenis}</td>
-              <td className="px-4 py-2">{p.nama}</td>
-              <td className="px-4 py-2">{p.tanggal_lahir}</td>
-              <td className="px-4 py-2"><img src={p.url_foto} alt={p.nama} className="h-12 w-12 object-cover rounded"/></td>
-              <td className="px-4 py-2 space-x-2">
-                <button onClick={() => router.push(`/hewan-peliharaan/${p.key}`)} className="px-2 py-1 bg-blue-600 text-white rounded">Update</button>
-                <button onClick={() => router.push(`/hewan-peliharaan/${p.key}/delete`)} className="px-2 py-1 bg-red-600 text-white rounded">Delete</button>
-              </td>
-            </tr>
+    <div className="min-h-screen bg-gray-50 px-4 py-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">List Hewan Peliharaan</h1>
+          <Link href="/hewan-peliharaan/create">
+            <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full flex items-center gap-2 transition-shadow shadow-md">
+              <PlusIcon />
+              <span>Create New Pet</span>
+            </button>
+          </Link>
+        </div>
+        <div className="bg-white rounded-2xl shadow overflow-hidden">
+          <div className="grid grid-cols-7 bg-gray-100">
+            <div className="py-3 text-center font-semibold">No</div>
+            <div className="py-3 text-center font-semibold">Pemilik</div>
+            <div className="py-3 text-center font-semibold">Jenis</div>
+            <div className="py-3 text-center font-semibold">Nama</div>
+            <div className="py-3 text-center font-semibold">Lahir</div>
+            <div className="py-3 text-center font-semibold">Foto</div>
+            <div className="py-3 text-center font-semibold">Action</div>
+          </div>
+          {pets.map((pet, idx) => (
+            <div key={pet.key} className="grid grid-cols-7 items-center border-t border-gray-200 hover:bg-gray-50">
+              <div className="py-3 text-center">{idx + 1}</div>
+              <div className="py-3 text-center text-gray-800">{pet.pemilik}</div>
+              <div className="py-3 text-center text-gray-800">{pet.jenis}</div>
+              <div className="py-3 text-center text-gray-800">{pet.nama}</div>
+              <div className="py-3 text-center text-gray-800">{pet.tanggal_lahir}</div>
+              <div className="py-3 text-center">
+                <img src={pet.url_foto} alt={pet.nama} className="h-12 w-12 object-cover rounded-full mx-auto" />
+              </div>
+              <div className="py-3 flex justify-center space-x-3">
+                <Link href={`/hewan-peliharaan/${pet.key}/edit`}>
+                  <button className="bg-blue-100 hover:bg-blue-200 text-blue-600 p-2 rounded-full">
+                    <EditIcon />
+                  </button>
+                </Link>
+                <Link href={`/hewan-peliharaan/${pet.key}/delete`}>
+                  <button className="bg-red-100 hover:bg-red-200 text-red-600 p-2 rounded-full">
+                    <TrashIcon />
+                  </button>
+                </Link>
+              </div>
+            </div>
           ))}
-        </tbody>
-      </table>
+        </div>
+      </div>
     </div>
   );
 }
