@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pet Clinic System 🐾🏥
 
-## Getting Started
+Aplikasi ini adalah sistem manajemen klinik hewan, yang menyediakan berbagai fitur untuk memudahkan pengelolaan data hewan, klien, perawatan, dan vaksinasi. Tersedia berbagai role untuk setiap pengguna, yang memudahkan akses dan pengelolaan data. Pet Clinic System ini dibuat oleh kelompok A01 dengan anggota :
+- Regina Meilani Aruan - 2306275632  
+- Raisa Sakila - 2306165755  
+- Shabrina Aulia Kinanti - 2306245472  
+- Valentino Kim Fernando - 2306275771
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Daftar Fitur 🔧
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+###  **Navbar** - Raisa Sakila (2306165755)
+Fitur wajib yang tersedia untuk semua pengguna sebagai navigasi utama aplikasi.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### **C - Pengguna** - Valentino Kim Fernando (2306275771)
+Manajemen pengguna yang bisa diakses oleh semua role.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+###  **R - Login dan Logout**  - Shabrina Aulia Kinanti (2306245472)
+Fitur login dan logout untuk semua pengguna.
 
-## Learn More
+###  **RU - Dashboard Pengguna**  - Regina Meilani Aruan (2306275632)
+Tampilan dashboard untuk setiap pengguna setelah login, memudahkan akses ke fitur-fitur yang relevan dengan role masing-masing.
 
-To learn more about Next.js, take a look at the following resources:
+## 🟡 **Fitur Kuning**  - Valentino Kim Fernando (2306275771)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### R - Jenis Hewan
+Fitur untuk melihat jenis-jenis hewan yang terdaftar, dapat diakses oleh Front-Desk Officer dan Dokter Hewan.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### CUD - Jenis Hewan
+Menambah, mengubah, dan menghapus data jenis hewan yang dapat diakses oleh Front-Desk Officer.
 
-## Deploy on Vercel
+### CRU - Hewan Peliharaan
+Menambah, mengubah, dan melihat data hewan peliharaan, diakses oleh Front-Desk Officer dan Klien.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### D - Hewan Peliharaan
+Menghapus data hewan peliharaan yang dapat diakses oleh Front-Desk Officer.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🟢 **Fitur Hijau**  - Raisa Sakila (2306165755)
+
+### CRUD - Perawatan Hewan
+Menambah, mengubah, menghapus, dan melihat data perawatan hewan, dapat diakses oleh semua role.
+
+### R - Kunjungan
+Fitur untuk melihat data kunjungan hewan ke klinik, dapat diakses oleh semua role.
+
+### CUD - Kunjungan
+Menambah, mengubah, dan menghapus data kunjungan, diakses oleh Front-Desk Officer.
+
+### R - Rekam Medis
+Fitur untuk melihat data rekam medis hewan, dapat diakses oleh semua role.
+
+### CU - Rekam Medis
+Mengubah dan menambah rekam medis, dapat diakses oleh Dokter Hewan.
+
+##  🔵 **Fitur Biru** - Regina Meilani Aruan (2306275632)
+
+### CRUD - Manajemen Obat
+Menambah, mengubah, menghapus, dan melihat data obat yang dikelola oleh Tenaga Medis.
+
+### CRUD - Manajemen Perawatan 
+Menambah, mengubah, menghapus, dan melihat data perawatan hewan, dikelola oleh Tenaga Medis.
+
+### CRD - Pemberian Obat di Perawatan
+Menambah, melihat, dan menghapus pemberian obat pada perawatan hewan, dapat diakses oleh Dokter Hewan dan Klien.
+
+##  🔴 **Fitur Merah** - Shabrina Aulia Kinanti (2306245472)
+
+### RUD - Manajemen Vaksinasi Hewan 
+Menambah, mengubah, menghapus, dan melihat data vaksinasi hewan yang dikelola oleh Dokter Hewan.
+
+### CRUD - Data dan Stok Vaksin 
+Mengelola data dan stok vaksin, fitur ini dikelola oleh Staf Klinik.
+
+### R - Data Klien dan Hewan Peliharaan
+Melihat data klien dan hewan peliharaan yang terdaftar, dapat diakses oleh Front-Desk Officer.
+
+---
+
+## Teknologi yang Digunakan ⚙️
+
+- **Next.js**: Framework utama untuk frontend, menyediakan rendering sisi server (SSR) dan statis (SSG).
+- **React.js**: Digunakan untuk membangun antarmuka pengguna interaktif.
+- **HTML/CSS**: Untuk struktur dan styling halaman.
+- **JavaScript**: Untuk interaktivitas di sisi klien.
+
+---
+
+## Routing Next.js 📍
+
+Di dalam proyek ini, **Next.js** digunakan untuk routing antarmuka pengguna (frontend) dengan rute `http://localhost:3000`
