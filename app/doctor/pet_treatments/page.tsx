@@ -1,16 +1,35 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 
-export default function TreatmentManagement() {
+export default function TreatmentListManagement() {
   // Dummy data
   const [treatments, setTreatments] = useState([
-    { id: 1, visitId: 'KJN001', animalName: 'Muezza', clientId: '4d925fd2-7ab6-4409-83c9-0c0e586d0e87', frontDeskId: 'e3a9db95-4ac8-4b9d-9182-35f2c511fa74', nurseId: 'd2f781d2-3df4-4c10-9336-85bc91eb37cf', doctorId: '69d3a2d1-5f80-4e86-961e-6b83eac1d6ae', treatmentCode: 'TRM001', treatmentNotes: 'Pemeriksaan umum lengkap; suhu, nadi, dan berat badan normal.' },
-    { id: 2, visitId: 'KJN002', animalName: 'Simba', clientId: '91e9840f-7a45-48c3-9ce2-d23b48135b99', frontDeskId: 'b5f2ff4e-50c3-43ce-bf89-4863f4cbf582', nurseId: '9d96cf4c-1952-4ec9-81f0-63c94a1576b9', doctorId: '0a6f60b1-9dd2-4ce0-8054-13b4631d26ef', treatmentCode: 'TRM002', treatmentNotes: 'Telinga dibersihkan; diberikan tetes telinga antibakteri.' }
+    { id: 1, visitId: 'KJN001', animalName: 'Muezza', clientId: '4d925fd2-7ab6-4409-83c9-0c0e586d0e87', frontDeskId: 'James Martin', nurseId: 'Andrew Clark', doctorId: 'dr. Sophia Taylor', treatmentCode: 'TRM001 - Pemeriksaan Umum', treatmentNotes: 'Pemeriksaan umum lengkap; suhu, nadi, dan berat badan normal.' },
+    { id: 2, visitId: 'KJN002', animalName: 'Simba', clientId: '91e9840f-7a45-48c3-9ce2-d23b48135b99', frontDeskId: 'Lisa White', nurseId: 'Emily Wilson', doctorId: 'dr. Charles Brown', treatmentCode: 'TRM005 - Penanganan Luka Ringan', treatmentNotes: 'Telinga dibersihkan; diberikan tetes telinga antibakteri.' }
   ]);
 
   // Dummy data for available visits and animals
   const availableVisits = ['KJN001', 'KJN002'];
-  const availableTreatments = ['TRM001', 'TRM002', 'TRM003', 'TRM004', 'TRM005'];
+  const availableTreatments = ['TRM001 - Pemeriksaan Umum', 'TRM002 - Pembersihan Telinga', 'TRM003 - Perawatan Bulu dan Kuku', 'TRM004 - Perawatan Reproduksi', 'TRM005 - Penanganan Luka Ringan'];
+  const visitDetails = [
+    {
+      visitId: 'KJN001',
+      animalName: 'Muezza',
+      clientId: '4d925fd2-7ab6-4409-83c9-0c0e586d0e87',
+      frontDeskId: 'James Martin',
+      nurseId: 'Andrew Clark',
+      doctorId: 'dr. Sophia Taylor'
+    },
+    {
+      visitId: 'KJN002',
+      animalName: 'Simba',
+      clientId: '91e9840f-7a45-48c3-9ce2-d23b48135b99',
+      frontDeskId: 'Lisa White',
+      nurseId: 'Emily Wilson',
+      doctorId: 'dr. Charles Brown'
+    }
+  ];
+  
 
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -40,6 +59,21 @@ export default function TreatmentManagement() {
   useEffect(() => {
     setNotesValue(formData.treatmentNotes);
   }, [formData.treatmentNotes]);
+
+  useEffect(() => {
+  const selectedVisit = visitDetails.find(v => v.visitId === formData.visitId);
+  if (selectedVisit) {
+    setFormData(prev => ({
+      ...prev,
+      animalName: selectedVisit.animalName,
+      clientId: selectedVisit.clientId,
+      frontDeskId: selectedVisit.frontDeskId,
+      nurseId: selectedVisit.nurseId,
+      doctorId: selectedVisit.doctorId
+    }));
+  }
+}, [formData.visitId]);
+
 
   // Handle form input changes except textarea
   const handleInputChange = (e) => {
@@ -121,14 +155,18 @@ export default function TreatmentManagement() {
                 name="visitId"
                 value={formData.visitId}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md p-2"
+                className={`w-full border rounded-md p-2 
+                  ${isUpdate ? 'bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200' : 'border-gray-300'}`}
                 required
+                disabled={isUpdate}
               >
                 <option value="">Pilih Kunjungan</option>
                 {availableVisits.map((visit) => (
                   <option key={visit} value={visit}>{visit}</option>
                 ))}
+                
               </select>
+              {/* ///ambil value nama hewa, client id, id rfotnr deks, id perawat, id dokter dari knj yang dipilih */}
             </div>
 
             <div>

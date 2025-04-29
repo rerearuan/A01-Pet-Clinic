@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState } from 'react';
 import { FaPlus, FaFileMedical, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
@@ -13,6 +13,8 @@ type Kunjungan = {
   visitType: 'Walk-In' | 'Janji Temu' | 'Darurat';
   startTime: string;
   endTime: string;
+  dokterId: string;
+  perawatId: string;
 };
 
 type RekamMedis = {
@@ -23,38 +25,42 @@ type RekamMedis = {
   waktuPerawatan: string;
 };
 
-export default function VisitPage() {
+export default function VisitPage({ role }: VisitPageProps) {
   const router = useRouter();
   
   // State for visits data
   const [visits, setVisits] = useState<Kunjungan[]>([
     {
-      id: 'KJ-2023-001',
+      id: 'KJN001',
       clientId: 'CL-00123',
       petName: 'Max',
       petType: 'Kucing',
       visitType: 'Janji Temu',
       startTime: '2023-05-15T10:00:00',
       endTime: '2023-05-15T11:30:00',
+      dokterId: 'DR-001',
+      perawatId: 'NR-001'
     },
     {
-      id: 'KJ-2023-002',
+      id: 'KJN002',
       clientId: 'CL-00456',
       petName: 'Bella',
       petType: 'Anjing',
       visitType: 'Walk-In',
       startTime: '2023-05-16T14:00:00',
       endTime: '2023-05-16T15:15:00',
+      dokterId: 'DR-002',
+      perawatId: 'NR-002'
     },
   ]);
 
   // State for medical records
   const [medicalRecords, setMedicalRecords] = useState<Record<string, RekamMedis>>({
-    'KJ-2023-001': {
+    'KJN001': {
       suhuTubuh: '38',
       beratBadan: '12.3',
       jenisPerawatan: 'Vaksinasi',
-      catatan: 'Lorem Ipsum Dolor Sir Ahjirfbgfbjbnjvbnkg bhjbbjhj',
+      catatan: 'Suhu tubuhnya sangat panas diperluka tindakan dengan segera',
       waktuPerawatan: '2023-05-15T10:30:00',
     }
   });
@@ -75,7 +81,20 @@ export default function VisitPage() {
     visitType: 'Walk-In',
     startTime: '',
     endTime: '',
+    dokterId: '',
+    perawatId: ''
   });
+
+  // Dummy data for doctors and nurses
+  const doctors = [
+    { id: 'DR-001', name: 'Dr. Sophia Taylor' },
+    { id: 'DR-002', name: 'Dr. Charles Brown' }
+  ];
+
+  const nurses = [
+    { id: 'NR-001', name: 'Andrew Clark' },
+    { id: 'NR-002', name: 'Emily Wilson' }
+  ];
 
   const formatDateTime = (isoString: string) => {
     const date = new Date(isoString);
@@ -113,6 +132,8 @@ export default function VisitPage() {
       visitType: kunjungan.visitType,
       startTime: kunjungan.startTime,
       endTime: kunjungan.endTime,
+      dokterId: kunjungan.dokterId,
+      perawatId: kunjungan.perawatId
     });
     setShowUpdateModal(true);
   };
@@ -159,6 +180,8 @@ export default function VisitPage() {
       visitType: 'Walk-In',
       startTime: '',
       endTime: '',
+      dokterId: '',
+      perawatId: ''
     });
   };
 
@@ -209,7 +232,39 @@ export default function VisitPage() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tipe Kunjungan</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Dokter Hewan</label>
+            <select
+              name="dokterId"
+              value={formData.dokterId}
+              onChange={handleFormChange}
+              className="w-full p-2 border border-gray-300 rounded-md"
+              required
+            >
+              <option value="">Pilih Dokter</option>
+              {doctors.map(doctor => (
+                <option key={doctor.id} value={doctor.id}>{doctor.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Perawat Hewan</label>
+            <select
+              name="perawatId"
+              value={formData.perawatId}
+              onChange={handleFormChange}
+              className="w-full p-2 border border-gray-300 rounded-md"
+              required
+            >
+              <option value="">Pilih Perawat</option>
+              {nurses.map(nurse => (
+                <option key={nurse.id} value={nurse.id}>{nurse.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Metode Kunjungan</label>
             <select
               name="visitType"
               value={formData.visitType}
@@ -257,7 +312,7 @@ export default function VisitPage() {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="px-4 py-2 bg-[#FD7E14] text-white rounded-md hover:bg-[#FD7E14]"
             >
               {isCreate ? 'Buat' : 'Update'}
             </button>
@@ -291,7 +346,7 @@ export default function VisitPage() {
           </button>
           <button
             onClick={handleDelete}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            className="px-4 py-2 bg-[#FD7E14] text-white rounded-md hover:bg-red-700"
           >
             Hapus
           </button>
@@ -299,6 +354,9 @@ export default function VisitPage() {
       </div>
     </div>
   );
+
+  role = 'front-desk'
+  const canEditDelete = role === 'front-desk';
 
   return (
     <div
@@ -311,12 +369,13 @@ export default function VisitPage() {
       </div>
 
       <div className="mb-4 flex justify-end">
-        <button
+        {canEditDelete && (<button
           onClick={() => setShowCreateModal(true)}
           className="bg-[#FD7E14] hover:bg-[#E67112] text-white px-4 py-2 rounded-md"
         >
           + Buat Kunjungan Baru
         </button>
+        )}
       </div>
 
 
@@ -340,7 +399,7 @@ export default function VisitPage() {
                 <td className="px-4 py-3 whitespace-nowrap text-sm">{visit.id}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm">{visit.clientId}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm">
-                  {visit.petName} ({visit.petType})
+                  {visit.petName}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -354,7 +413,7 @@ export default function VisitPage() {
                 <td className="px-4 py-3 whitespace-nowrap text-sm">{formatDateTime(visit.startTime)}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm">{formatDateTime(visit.endTime)}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm">
-                  <button 
+                    <button 
                     onClick={() => handleShowMedicalRecord(visit.id)}
                     className="text-blue-600 hover:text-blue-800 inline-flex items-center"
                   >
@@ -363,18 +422,19 @@ export default function VisitPage() {
                   </button>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm space-x-2">
-                  <button 
+                  {canEditDelete && (<button 
                     onClick={() => prepareUpdate(visit)}
                     className="text-blue-600 hover:text-blue-800"
                   >
                     <FaEdit />
                   </button>
-                  <button 
+                  )}
+                  {canEditDelete && (<button 
                     onClick={() => prepareDelete(visit.id)}
                     className="text-red-600 hover:text-red-800"
                   >
                     <FaTrash />
-                  </button>
+                  </button>)}
                 </td>
               </tr>
             ))}
