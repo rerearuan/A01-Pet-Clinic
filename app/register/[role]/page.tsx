@@ -1,393 +1,95 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 
-interface RegisterRolePageProps {
-  params: {
-    role: string;
-  };
-}
-
-export default function RegisterRolePage({ params }: RegisterRolePageProps) {
+export default function RegisterRolePage() {
+  const { role } = useParams();
   const router = useRouter();
-  const { role } = params;
 
-  // Validate role
-  useEffect(() => {
-    const validRoles = ['individu', 'perusahaan', 'front-desk-officer', 'dokter-hewan', 'perawat-hewan'];
-    if (!validRoles.includes(role)) {
-      router.push('/register');
-    }
-  }, [role, router]);
-
-  // Common fields
+  // Common state (email, password, phone, address)
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
 
-  // Klien Individu fields
-  const [firstName, setFirstName] = useState('');
-  const [middleName, setMiddleName] = useState('');
-  const [lastName, setLastName] = useState('');
+  useEffect(() => {
+    const valid = ['individu','perusahaan','front-desk-officer','dokter-hewan','perawat-hewan'];
+    if (!valid.includes(Array.isArray(role) ? role[0] : role!)) router.push('/register');
+  }, [role, router]);
 
-  // Klien Perusahaan fields
-  const [companyName, setCompanyName] = useState('');
-
-  // Staff fields
-  const [receivedDate, setReceivedDate] = useState('');
-
-  // Medical staff fields (dokter-hewan & perawat-hewan)
-  const [licenseNumber, setLicenseNumber] = useState('');
-  const [certificates, setCertificates] = useState([{ number: '', name: '' }]);
-  
-  // Dokter Hewan additional fields
-  const [practiceSchedules, setPracticeSchedules] = useState([{ day: '', time: '' }]);
-
-  const handleAddCertificate = () => {
-    setCertificates([...certificates, { number: '', name: '' }]);
-  };
-
-  const handleCertificateChange = (index: number, field: keyof typeof certificates[0], value: string) => {
-      const updatedCertificates = [...certificates];
-      updatedCertificates[index][field] = value;
-      setCertificates(updatedCertificates);
-  };
-
-  const handleAddPracticeSchedule = () => {
-    setPracticeSchedules([...practiceSchedules, { day: '', time: '' }]);
-  };
-
-  const handlePracticeScheduleChange = (index: number, field: keyof typeof practiceSchedules[0], value: string) => {
-    const updatedSchedules = [...practiceSchedules];
-    updatedSchedules[index][field] = value;
-    setPracticeSchedules(updatedSchedules);
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    
-    // Create registration data based on role
-    let registrationData: Record<string, any> = {
-      role,
-      email,
-      password,
-      phone,
-      address,
-    };
-
-    // Add role-specific data
-    switch (role) {
-      case 'individu':
-        registrationData = {
-          ...registrationData,
-          firstName,
-          middleName,
-          lastName,
-        };
-        break;
-      case 'perusahaan':
-        registrationData = {
-          ...registrationData,
-          companyName,
-        };
-        break;
-      case 'front-desk-officer':
-        registrationData = {
-          ...registrationData,
-          receivedDate,
-        };
-        break;
-      case 'dokter-hewan':
-        registrationData = {
-          ...registrationData,
-          licenseNumber,
-          receivedDate,
-          certificates,
-          practiceSchedules,
-        };
-        break;
-      case 'perawat-hewan':
-        registrationData = {
-          ...registrationData,
-          licenseNumber,
-          receivedDate,
-          certificates,
-        };
-        break;
-    }
-
-    try {
-      // TODO: Replace with actual API call
-      console.log('Registration data:', registrationData);
-      
-      // Simulate successful registration
-      localStorage.setItem('isAuthenticated', 'true');
-      router.push('/login');
-    } catch (error) {
-      console.error('Registration failed:', error);
-    }
-  };
-
-  // Helper function to get the title based on role
-  const getRoleTitle = () => {
+  const getTitle = () => {
     switch (role) {
       case 'individu': return 'Klien - Individu';
       case 'perusahaan': return 'Klien - Perusahaan';
-      case 'front-desk-officer': return 'Front-Desk Officer';
+      case 'front-desk-officer': return 'Front Desk Officer';
       case 'dokter-hewan': return 'Dokter Hewan';
       case 'perawat-hewan': return 'Perawat Hewan';
-      default: return 'Register';
+      default: return '';
     }
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: submit
+    router.push('/login');
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8">
-        <h2 className="text-2xl font-bold text-center mb-6">FORM REGISTER</h2>
-        <h3 className="text-lg font-medium text-center mb-6">{getRoleTitle()}</h3>
-        
+    <div className="min-h-screen bg-gray-50 px-4 py-8">
+      <div className="max-w-md mx-auto bg-white rounded-2xl shadow p-8">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Register - {getTitle()}</h1>
+          <Link href="/register" className="text-gray-500 hover:text-gray-700">Back</Link>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Medical Staff Fields */}
-          {['dokter-hewan', 'perawat-hewan'].includes(role) && (
-            <>
-              <div className="mb-4">
-                <h4 className="font-medium mb-2">Informasi Umum</h4>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Nomor Izin Praktik *</label>
-                  <input
-                    type="text"
-                    required
-                    value={licenseNumber}
-                    onChange={(e) => setLicenseNumber(e.target.value)}
-                    className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-black"
-                    placeholder="Nomor Izin Praktik"
-                  />
-                </div>
-              </div>
-            </>
-          )}
-          
-          {/* Email Field (Common) */}
           <div>
-            <label className="block text-sm font-medium mb-1">Email *</label>
+            <label className="block text-gray-700 font-semibold mb-1">Email *</label>
             <input
               type="email"
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-black"
-              placeholder="Email"
+              onChange={e => setEmail(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-orange-300 focus:border-orange-300"
             />
           </div>
-
-          {/* Individu Fields */}
-          {role === 'individu' && (
-            <>
-              <div>
-                <label className="block text-sm font-medium mb-1">Nama Depan *</label>
-                <input
-                  type="text"
-                  required
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-black"
-                  placeholder="Nama Depan"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Nama Tengah</label>
-                <input
-                  type="text"
-                  value={middleName}
-                  onChange={(e) => setMiddleName(e.target.value)}
-                  className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-black"
-                  placeholder="Nama Tengah"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Nama Belakang *</label>
-                <input
-                  type="text"
-                  required
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-black"
-                  placeholder="Nama Belakang"
-                />
-              </div>
-            </>
-          )}
-
-          {/* Perusahaan Fields */}
-          {role === 'perusahaan' && (
-            <div>
-              <label className="block text-sm font-medium mb-1">Nama Perusahaan *</label>
-              <input
-                type="text"
-                required
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-black"
-                placeholder="Nama Perusahaan"
-              />
-            </div>
-          )}
-
-          {/* Password Field (Common) */}
           <div>
-            <label className="block text-sm font-medium mb-1">Password *</label>
+            <label className="block text-gray-700 font-semibold mb-1">Password *</label>
             <input
               type="password"
               required
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-black"
-              placeholder="Password"
+              onChange={e => setPassword(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-orange-300 focus:border-orange-300"
             />
           </div>
-
-          {/* Phone Field (Common) */}
           <div>
-            <label className="block text-sm font-medium mb-1">Nomor Telepon *</label>
+            <label className="block text-gray-700 font-semibold mb-1">Nomor Telepon *</label>
             <input
               type="tel"
               required
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-black"
-              placeholder="Nomor Telepon"
+              onChange={e => setPhone(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-orange-300 focus:border-orange-300"
             />
           </div>
-
-          {/* Staff Fields */}
-          {['front-desk-officer', 'dokter-hewan', 'perawat-hewan'].includes(role) && (
-            <div>
-              <label className="block text-sm font-medium mb-1">Tanggal Diterima *</label>
-              <input
-                type="date"
-                required
-                value={receivedDate}
-                onChange={(e) => setReceivedDate(e.target.value)}
-                className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-black"
-              />
-            </div>
-          )}
-
-          {/* Address Field (Common) */}
           <div>
-            <label className="block text-sm font-medium mb-1">Alamat *</label>
+            <label className="block text-gray-700 font-semibold mb-1">Alamat *</label>
             <textarea
               required
               value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-black"
-              placeholder="Alamat"
+              onChange={e => setAddress(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-orange-300 focus:border-orange-300"
             />
           </div>
-
-          {/* Certificate Fields for Medical Staff */}
-          {['dokter-hewan', 'perawat-hewan'].includes(role) && (
-            <div className="mt-6">
-              <h4 className="font-medium mb-2">Kompetensi</h4>
-              {certificates.map((cert, index) => (
-                <div key={index} className="space-y-3 mb-3">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Nomor Sertifikat *</label>
-                    <input
-                      type="text"
-                      required
-                      value={cert.number}
-                      onChange={(e) => handleCertificateChange(index, 'number', e.target.value)}
-                      className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-black"
-                      placeholder="Nomor Sertifikat"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Nama Sertifikat *</label>
-                    <input
-                      type="text"
-                      required
-                      value={cert.name}
-                      onChange={(e) => handleCertificateChange(index, 'name', e.target.value)}
-                      className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-black"
-                      placeholder="Nama Sertifikat"
-                    />
-                  </div>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={handleAddCertificate}
-                className="flex items-center justify-center text-sm bg-gray-800 text-white px-3 py-1 rounded-md hover:bg-gray-700"
-              >
-                <span className="mr-1">+</span> Tambah Sertifikat
-              </button>
-            </div>
-          )}
-
-          {/* Practice Schedule for Dokter Hewan */}
-          {role === 'dokter-hewan' && (
-            <div className="mt-6">
-              <h4 className="font-medium mb-2">Jadwal Praktik</h4>
-              {practiceSchedules.map((schedule, index) => (
-                <div key={index} className="flex space-x-2 mb-3">
-                  <div className="w-1/2">
-                    <label className="block text-sm font-medium mb-1">Hari *</label>
-                    <select
-                      required
-                      value={schedule.day}
-                      onChange={(e) => handlePracticeScheduleChange(index, 'day', e.target.value)}
-                      className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-black"
-                    >
-                      <option value="">Pilih Hari</option>
-                      <option value="Senin">Senin</option>
-                      <option value="Selasa">Selasa</option>
-                      <option value="Rabu">Rabu</option>
-                      <option value="Kamis">Kamis</option>
-                      <option value="Jumat">Jumat</option>
-                      <option value="Sabtu">Sabtu</option>
-                      <option value="Minggu">Minggu</option>
-                    </select>
-                  </div>
-                  <div className="w-1/2">
-                    <label className="block text-sm font-medium mb-1">Jam *</label>
-                    <input
-                      type="text"
-                      required
-                      value={schedule.time}
-                      onChange={(e) => handlePracticeScheduleChange(index, 'time', e.target.value)}
-                      className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-black"
-                      placeholder="Contoh: 08:00-12:00"
-                    />
-                  </div>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={handleAddPracticeSchedule}
-                className="flex items-center justify-center text-sm bg-gray-800 text-white px-3 py-1 rounded-md hover:bg-gray-700"
-              >
-                <span className="mr-1">+</span> Tambah Jadwal
-              </button>
-            </div>
-          )}
-
-          <div className="pt-4">
-            <button
-              type="submit"
-              className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-900 transition"
-            >
-              Register
-            </button>
-            <div className="mt-3 text-center">
-              <Link href="/register" className="text-sm text-gray-600 hover:underline">
-                Kembali ke Pilihan Role
-              </Link>
-            </div>
-          </div>
+          {/* TODO: add role-specific fields here */}
+          <button
+            type="submit"
+            className="bg-orange-500 hover:bg-orange-600 w-full text-white px-4 py-2 rounded-full flex justify-center gap-2 transition-shadow shadow-md"
+          >
+            Register
+          </button>
         </form>
       </div>
     </div>
