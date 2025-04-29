@@ -1,67 +1,64 @@
 'use client';
+
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { PlusIcon, EditIcon, TrashIcon } from '../../components/Icons';
 
-interface JenisHewan { id: string; nama_jenis: string; }
+type Jenis = { id: string; nama: string };
 
-export default function ListJenisHewan() {
-  const [data, setData] = useState<JenisHewan[]>([]);
-  const router = useRouter();
+export default function ListJenis() {
+  const [items, setItems] = useState<Jenis[]>([]);
 
   useEffect(() => {
-    // Dummy data for Jenis Hewan
-    setData([
-      { id: 'HWN001', nama_jenis: 'Kucing' },
-      { id: 'HWN002', nama_jenis: 'Anjing' },
-      { id: 'HWN003', nama_jenis: 'Hamster' },
-      { id: 'HWN004', nama_jenis: 'Burung' },
-      { id: 'HWN005', nama_jenis: 'Ikan' },
+    setItems([
+      { id: 'HWN001', nama: 'Kucing' },
+      { id: 'HWN002', nama: 'Anjing' },
+      { id: 'HWN003', nama: 'Hamster' },
+      { id: 'HWN004', nama: 'Burung' },
+      { id: 'HWN005', nama: 'Ikan' },
     ]);
   }, []);
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">List Animal Type</h1>
-      <button
-        onClick={() => router.push('/jenis-hewan/create')}
-        className="mb-4 px-4 py-2 bg-black text-white rounded-lg"
-      >
-        + Create New Animal Type
-      </button>
-
-      <table className="min-w-full table-auto">
-        <thead>
-          <tr>
-            <th className="px-4 py-2">No</th>
-            <th className="px-4 py-2">ID Type</th>
-            <th className="px-4 py-2">Nama Jenis</th>
-            <th className="px-4 py-2">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row, i) => (
-            <tr key={row.id} className="border-t">
-              <td className="px-4 py-2">{i + 1}</td>
-              <td className="px-4 py-2">{row.id}</td>
-              <td className="px-4 py-2">{row.nama_jenis}</td>
-              <td className="px-4 py-2 space-x-2">
-                <button
-                  onClick={() => router.push(`/jenis-hewan/${row.id}`)}
-                  className="px-2 py-1 bg-blue-600 text-white rounded"
-                >
-                  Update
-                </button>
-                <button
-                  onClick={() => router.push(`/jenis-hewan/${row.id}/delete`)}
-                  className="px-2 py-1 bg-red-600 text-white rounded"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
+    <div className="min-h-screen bg-gray-50 px-4 py-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">List Jenis Hewan</h1>
+          <Link href="/jenis-hewan/create">
+            <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full flex items-center gap-2 transition-shadow shadow-md">
+              <PlusIcon />
+              <span>Create New Type</span>
+            </button>
+          </Link>
+        </div>
+        <div className="bg-white rounded-2xl shadow overflow-hidden">
+          <div className="grid grid-cols-4 bg-gray-100">
+            <div className="py-3 text-center font-semibold">No</div>
+            <div className="py-3 text-center font-semibold">ID</div>
+            <div className="py-3 text-center font-semibold">Nama</div>
+            <div className="py-3 text-center font-semibold">Action</div>
+          </div>
+          {items.map((it, idx) => (
+            <div key={it.id} className="grid grid-cols-4 items-center border-t border-gray-200 hover:bg-gray-50">
+              <div className="py-3 text-center">{idx + 1}</div>
+              <div className="py-3 text-center font-mono text-gray-700">{it.id}</div>
+              <div className="py-3 text-center text-gray-800">{it.nama}</div>
+              <div className="py-3 flex justify-center space-x-3">
+                <Link href={`/jenis-hewan/${it.id}/edit`}>  
+                  <button className="bg-blue-100 hover:bg-blue-200 text-blue-600 p-2 rounded-full">
+                    <EditIcon />
+                  </button>
+                </Link>
+                <Link href={`/jenis-hewan/${it.id}/delete`}>  
+                  <button className="bg-red-100 hover:bg-red-200 text-red-600 p-2 rounded-full">
+                    <TrashIcon />
+                  </button>
+                </Link>
+              </div>
+            </div>
           ))}
-        </tbody>
-      </table>
+        </div>
+      </div>
     </div>
   );
 }
