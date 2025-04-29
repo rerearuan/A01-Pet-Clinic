@@ -24,7 +24,6 @@ const PrescriptionPage = () => {
     { code: 'MED010', name: 'Fipronil 0,25 % Spray', stock: 24, price: 68000 },
   ]);
 
-  // Corrected dummy prescriptions based on treatments
   const [prescriptions, setPrescriptions] = useState([
     { treatment: 'TRM001 - Pemeriksaan Umum', medicine: 'MED001 - Amoxicillin 250 mg Suspensi', quantity: 8, totalPrice: 360000 },
     { treatment: 'TRM002 - Pembersihan Telinga', medicine: 'MED002 - Meloxicam 5 mg Tablet', quantity: 7, totalPrice: 420000 },
@@ -92,29 +91,29 @@ const PrescriptionPage = () => {
   );
 
   return (
-    <div className="container">
-      <nav className="navbar">
-        <h1>Veterinary Clinic - Prescription Management</h1>
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      <nav className="bg-black text-white p-5">
+        <h1 className="text-center text-xl font-semibold">Pet Clinic - Prescription Management</h1>
       </nav>
 
       {/* Search Bar */}
-      <div className="search-container">
+      <div className="max-w-4xl mx-auto mt-10 mb-5">
         <input
           type="text"
           placeholder="Search Prescription"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-input"
+          className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
         />
       </div>
 
       {/* Create New Prescription Form */}
-      <div className="form-container">
-        <h2>Create New Prescription</h2>
+      <div className="max-w-4xl mx-auto bg-white p-6 shadow-lg rounded-xl mt-8">
+        <h2 className="text-2xl font-bold mb-6">Create New Prescription</h2>
         <form onSubmit={handleCreate}>
-          <div className="input-group">
-            <label>Jenis Perawatan</label>
-            <select value={newPrescription.treatment} onChange={(e) => setNewPrescription({ ...newPrescription, treatment: e.target.value })}>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Jenis Perawatan</label>
+            <select value={newPrescription.treatment} onChange={(e) => setNewPrescription({ ...newPrescription, treatment: e.target.value })} className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500">
               {treatments.map(treatment => (
                 <option key={treatment.code} value={treatment.code}>
                   {treatment.code} - {treatment.name}
@@ -122,9 +121,9 @@ const PrescriptionPage = () => {
               ))}
             </select>
           </div>
-          <div className="input-group">
-            <label>Obat</label>
-            <select value={newPrescription.medicine} onChange={(e) => setNewPrescription({ ...newPrescription, medicine: e.target.value })}>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Obat</label>
+            <select value={newPrescription.medicine} onChange={(e) => setNewPrescription({ ...newPrescription, medicine: e.target.value })} className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500">
               {medicines.map(medicine => (
                 <option key={medicine.code} value={medicine.code}>
                   {medicine.code} - {medicine.name} [{medicine.stock}]
@@ -132,180 +131,91 @@ const PrescriptionPage = () => {
               ))}
             </select>
           </div>
-          <div className="input-group">
-            <label>Kuantitas Obat</label>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Kuantitas Obat</label>
             <input
               type="number"
               value={newPrescription.quantity}
               onChange={(e) => setNewPrescription({ ...newPrescription, quantity: parseInt(e.target.value) })}
               min="1"
               max={medicines.find(med => med.code === newPrescription.medicine)?.stock || 0}
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500"
             />
           </div>
-          <button type="submit" className="btn">Create</button>
+          <button type="submit" className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition">Create</button>
         </form>
       </div>
 
       {/* Update Prescription Form */}
       {editPrescription && (
-        <div className="form-container">
-          <h2>Update Prescription</h2>
+        <div className="max-w-4xl mx-auto bg-white p-6 shadow-lg rounded-xl mt-8">
+          <h2 className="text-2xl font-bold mb-6">Update Prescription</h2>
           <form onSubmit={handleUpdate}>
-            <div className="input-group">
-              <label>Jenis Perawatan</label>
-              <input type="text" value={editPrescription.treatment} disabled />
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Jenis Perawatan</label>
+              <input type="text" value={editPrescription.treatment} disabled className="w-full p-3 rounded-lg bg-gray-100 border" />
             </div>
-            <div className="input-group">
-              <label>Obat</label>
-              <input type="text" value={editPrescription.medicine} disabled />
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Obat</label>
+              <input type="text" value={editPrescription.medicine} disabled className="w-full p-3 rounded-lg bg-gray-100 border" />
             </div>
-            <div className="input-group">
-              <label>Kuantitas Obat</label>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Kuantitas Obat</label>
               <input
                 type="number"
                 value={editPrescription.quantity}
                 onChange={(e) => setEditPrescription({ ...editPrescription, quantity: parseInt(e.target.value) })}
                 min="1"
                 max={medicines.find(med => med.code === editPrescription.medicine)?.stock || 0}
+                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500"
               />
             </div>
-            <button type="submit" className="btn">Update</button>
+            <button type="submit" className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition">Update</button>
           </form>
         </div>
       )}
 
       {/* List Prescriptions */}
-      <div className="list-container">
-        <h2>List of Prescriptions</h2>
-        <table>
+      <div className="max-w-4xl mx-auto mt-8 bg-white p-6 shadow-lg rounded-xl">
+        <h2 className="text-2xl font-bold mb-6">List of Prescriptions</h2>
+        <table className="min-w-full table-auto">
           <thead>
             <tr>
-              <th>No</th>
-              <th>Jenis Perawatan</th>
-              <th>Obat</th>
-              <th>Kuantitas Obat</th>
-              <th>Total Harga</th>
-              <th>Action</th>
+              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">No</th>
+              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">Jenis Perawatan</th>
+              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">Obat</th>
+              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">Kuantitas Obat</th>
+              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">Total Harga</th>
+              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">Action</th>
             </tr>
           </thead>
           <tbody>
             {filteredPrescriptions.map((prescription, index) => (
               <tr key={index}>
-                <td>{index + 1}</td>
-                <td>{prescription.treatment}</td>
-                <td>{prescription.medicine}</td>
-                <td>{prescription.quantity}</td>
-                <td>Rp{prescription.totalPrice.toLocaleString()}</td>
-                <td>
-                  <button className="btn" onClick={() => setEditPrescription(prescription)}>Update</button>
-                  <button className="btn" onClick={() => handleDelete(prescription.treatment, prescription.medicine)}>Delete</button>
+                <td className="py-3 px-6">{index + 1}</td>
+                <td className="py-3 px-6">{prescription.treatment}</td>
+                <td className="py-3 px-6">{prescription.medicine}</td>
+                <td className="py-3 px-6">{prescription.quantity}</td>
+                <td className="py-3 px-6">Rp{prescription.totalPrice.toLocaleString()}</td>
+                <td className="py-3 px-6 space-x-2">
+                  <button
+                    className="bg-black text-white py-1 px-3 rounded-lg hover:bg-gray-800 transition"
+                    onClick={() => setEditPrescription(prescription)}
+                  >
+                    Update
+                  </button>
+                  <button
+                    className="bg-red-500 text-white py-1 px-3 rounded-lg hover:bg-red-600 transition"
+                    onClick={() => handleDelete(prescription.treatment, prescription.medicine)}
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-
-      <style jsx>{`
-        .container {
-          font-family: Arial, sans-serif;
-          padding: 20px;
-          background-color: #f4f4f4;
-          color: #333;
-        }
-
-        .navbar {
-          background-color: #222;
-          color: #fff;
-          padding: 10px;
-          text-align: center;
-        }
-
-        .form-container {
-          margin-top: 20px;
-          background-color: #fff;
-          padding: 20px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .input-group {
-          margin-bottom: 10px;
-        }
-
-        .input-group label {
-          display: block;
-          font-size: 14px;
-          font-weight: bold;
-        }
-
-        .input-group input, .input-group select {
-          width: 100%;
-          padding: 8px;
-          margin-top: 5px;
-          font-size: 14px;
-        }
-
-        .btn {
-          background-color: #333;
-          color: white;
-          border: none;
-          padding: 10px 20px;
-          cursor: pointer;
-        }
-
-        .btn:hover {
-          background-color: #444;
-        }
-
-        .list-container {
-          margin-top: 20px;
-        }
-
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 20px;
-        }
-
-        table, th, td {
-          border: 1px solid #ddd;
-        }
-
-        th, td {
-          padding: 8px;
-          text-align: left;
-        }
-
-        th {
-          background-color: #f4f4f4;
-        }
-
-        td button {
-          background-color: #333;
-          color: white;
-          padding: 5px 10px;
-          margin-right: 5px;
-          cursor: pointer;
-        }
-
-        td button:hover {
-          background-color: #444;
-        }
-
-        .search-container {
-          margin-top: 20px;
-          margin-bottom: 20px;
-        }
-
-        .search-input {
-          padding: 8px;
-          font-size: 14px;
-          width: 100%;
-          max-width: 300px;
-          margin: 0 auto;
-          display: block;
-        }
-      `}</style>
     </div>
   );
 };

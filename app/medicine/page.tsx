@@ -69,125 +69,133 @@ const MedicinePage = () => {
   );
 
   return (
-    <div className="container">
-      <nav className="navbar">
-        <h1>Veterinary Clinic - Medicine Management</h1>
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      <nav className="bg-black text-white p-5">
+        <h1 className="text-center text-xl font-semibold">Pet Clinic - Medicine Management</h1>
       </nav>
 
       {/* Search Bar */}
-      <div className="search-container">
+      <div className="max-w-4xl mx-auto mt-10 mb-5">
         <input
           type="text"
           placeholder="Search Medicine"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-input"
+          className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
         />
       </div>
 
       {/* Create New Medicine Form */}
-      <div className="form-container">
-        <h2>Create New Medicine</h2>
+      <div className="max-w-4xl mx-auto bg-white p-6 shadow-lg rounded-xl mt-8">
+        <h2 className="text-2xl font-bold mb-6">Create New Medicine</h2>
         <form onSubmit={handleCreate}>
-          <div className="input-group">
-            <label>Name of Medicine</label>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Name of Medicine</label>
             <input
               type="text"
               value={newMedicine.name}
               onChange={(e) => setNewMedicine({ ...newMedicine, name: e.target.value })}
               placeholder="Medicine Name"
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500"
             />
           </div>
-          <div className="input-group">
-            <label>Price</label>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Price</label>
             <input
               type="text"
               value={newMedicine.price}
               onChange={(e) => setNewMedicine({ ...newMedicine, price: e.target.value })}
               placeholder="Price"
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500"
             />
           </div>
-          <div className="input-group">
-            <label>Stock</label>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Stock</label>
             <input
               type="text"
               value={newMedicine.stock}
               onChange={(e) => setNewMedicine({ ...newMedicine, stock: e.target.value })}
               placeholder="Stock"
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500"
             />
           </div>
-          <div className="input-group">
-            <label>Dose</label>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Dose</label>
             <input
               type="text"
               value={newMedicine.dose}
               onChange={(e) => setNewMedicine({ ...newMedicine, dose: e.target.value })}
               placeholder="Dose"
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500"
             />
           </div>
-          <button type="submit" className="btn">Create</button>
+          <button type="submit" className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition">Create</button>
         </form>
       </div>
 
       {/* Update Medicine Form */}
       {editMedicine && (
-        <div className="form-container">
-          <h2>Update Medicine</h2>
+        <div className="max-w-4xl mx-auto bg-white p-6 shadow-lg rounded-xl mt-8">
+          <h2 className="text-2xl font-bold mb-6">Update Medicine</h2>
           <form onSubmit={handleUpdate}>
-            <div className="input-group">
-              <label>Code</label>
-              <input type="text" value={editMedicine.code} disabled />
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Code</label>
+              <input type="text" value={editMedicine.code} disabled className="w-full p-3 rounded-lg bg-gray-100 border" />
             </div>
-            <div className="input-group">
-              <label>Name of Medicine</label>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Name of Medicine</label>
               <input
                 type="text"
                 value={editMedicine.name}
                 onChange={(e) => setEditMedicine({ ...editMedicine, name: e.target.value })}
+                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500"
               />
             </div>
-            <div className="input-group">
-              <label>Price</label>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Price</label>
               <input
                 type="text"
                 value={editMedicine.price}
                 onChange={(e) => setEditMedicine({ ...editMedicine, price: e.target.value })}
+                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500"
               />
             </div>
-            <div className="input-group">
-              <label>Stock</label>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Stock</label>
               <input
                 type="text"
                 value={editMedicine.stock}
                 onChange={(e) => setEditMedicine({ ...editMedicine, stock: e.target.value })}
+                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500"
               />
             </div>
-            <div className="input-group">
-              <label>Dose</label>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Dose</label>
               <input
                 type="text"
                 value={editMedicine.dose}
                 onChange={(e) => setEditMedicine({ ...editMedicine, dose: e.target.value })}
+                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500"
               />
             </div>
-            <button type="submit" className="btn">Update</button>
+            <button type="submit" className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition">Update</button>
           </form>
         </div>
       )}
 
       {/* List of Medicines */}
-      <div className="list-container">
-        <h2>List of Medicines</h2>
-        <table>
+      <div className="max-w-4xl mx-auto mt-8 bg-white p-6 shadow-lg rounded-xl">
+        <h2 className="text-2xl font-bold mb-6">List of Medicines</h2>
+        <table className="min-w-full table-auto">
           <thead>
             <tr>
-              <th>No</th>
-              <th>Code</th>
-              <th>Medicine Name</th>
-              <th>Price</th>
-              <th>Stock</th>
-              <th>Dose</th>
-              <th>Action</th>
+              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">No</th>
+              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">Code</th>
+              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">Medicine Name</th>
+              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">Price</th>
+              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">Stock</th>
+              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">Dose</th>
+              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -200,115 +208,14 @@ const MedicinePage = () => {
                 <td>{medicine.stock}</td>
                 <td>{medicine.dose}</td>
                 <td>
-                  <button className="btn" onClick={() => setEditMedicine({ ...medicine, price: medicine.price.toString(), stock: medicine.stock.toString(), dose: medicine.dose })}>Update</button>
-                  <button className="btn" onClick={() => handleDelete(medicine.code)}>Delete</button>
+                  <button className="bg-black text-white py-1 px-3 rounded-lg hover:bg-gray-800 transition" onClick={() => setEditMedicine({ ...medicine, price: medicine.price.toString(), stock: medicine.stock.toString(), dose: medicine.dose })}>Update</button>
+                  <button className="bg-red-500 text-white py-1 px-3 rounded-lg hover:bg-red-600 transition" onClick={() => handleDelete(medicine.code)}>Delete</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-
-      <style jsx>{`
-        .container {
-          font-family: Arial, sans-serif;
-          padding: 20px;
-          background-color: #f4f4f4;
-          color: #333;
-        }
-
-        .navbar {
-          background-color: #222;
-          color: #fff;
-          padding: 10px;
-          text-align: center;
-        }
-
-        .form-container {
-          margin-top: 20px;
-          background-color: #fff;
-          padding: 20px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .input-group {
-          margin-bottom: 10px;
-        }
-
-        .input-group label {
-          display: block;
-          font-size: 14px;
-          font-weight: bold;
-        }
-
-        .input-group input {
-          width: 100%;
-          padding: 8px;
-          margin-top: 5px;
-          font-size: 14px;
-        }
-
-        .btn {
-          background-color: #333;
-          color: white;
-          border: none;
-          padding: 10px 20px;
-          cursor: pointer;
-        }
-
-        .btn:hover {
-          background-color: #444;
-        }
-
-        .list-container {
-          margin-top: 20px;
-        }
-
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 20px;
-        }
-
-        table, th, td {
-          border: 1px solid #ddd;
-        }
-
-        th, td {
-          padding: 8px;
-          text-align: left;
-        }
-
-        th {
-          background-color: #f4f4f4;
-        }
-
-        td button {
-          background-color: #333;
-          color: white;
-          padding: 5px 10px;
-          margin-right: 5px;
-          cursor: pointer;
-        }
-
-        td button:hover {
-          background-color: #444;
-        }
-
-        .search-container {
-          margin-top: 20px;
-          margin-bottom: 20px;
-        }
-
-        .search-input {
-          padding: 8px;
-          font-size: 14px;
-          width: 100%;
-          max-width: 300px;
-          margin: 0 auto;
-          display: block;
-        }
-      `}</style>
     </div>
   );
 };
