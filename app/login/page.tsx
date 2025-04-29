@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -9,17 +9,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const router = useRouter();
 
-  useEffect(() => {
-    const isAuthenticated = localStorage.getItem('isAuthenticated');
-    if (isAuthenticated === 'true') {
-      router.push('/dashboard');
-    }
-  }, [router]);
-
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // TANPA cek email/password
+
+    // Simpan ke localStorage kalau mau, terserah
     localStorage.setItem('isAuthenticated', 'true');
+    
+    // Setelah klik login, baru redirect
     router.push('/dashboard');
   };
 
@@ -36,8 +32,6 @@ export default function LoginPage() {
 
       {/* Content */}
       <div className="relative z-10 flex flex-col min-h-screen">
-        
-
         {/* Login Form */}
         <div className="flex flex-1 items-center justify-center p-6">
           <div className="w-full max-w-md bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl p-10 space-y-8">
