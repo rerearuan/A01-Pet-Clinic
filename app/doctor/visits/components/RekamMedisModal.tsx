@@ -8,6 +8,10 @@ type RekamMedis = {
   beratBadan: string;
   jenisPerawatan: string;
   catatan: string;
+<<<<<<< HEAD
+=======
+  waktuPerawatan: string;
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
 };
 
 type RekamMedisModalProps = {
@@ -15,7 +19,10 @@ type RekamMedisModalProps = {
   onClose: () => void;
   onSubmit: (data: RekamMedis) => void;
   existingData?: RekamMedis | null;
+<<<<<<< HEAD
   role:string
+=======
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
 };
 
 export default function RekamMedisModal({
@@ -23,7 +30,10 @@ export default function RekamMedisModal({
   onClose,
   onSubmit,
   existingData = null,
+<<<<<<< HEAD
   role
+=======
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
 }: RekamMedisModalProps) {
   const [formData, setFormData] = useState<RekamMedis>(
     existingData || {
@@ -31,6 +41,10 @@ export default function RekamMedisModal({
       beratBadan: '',
       jenisPerawatan: '',
       catatan: '',
+<<<<<<< HEAD
+=======
+      waktuPerawatan: new Date().toISOString().slice(0, 16),
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
     }
   );
   
@@ -64,8 +78,12 @@ export default function RekamMedisModal({
       setShowForm(false);
     }
   };
+<<<<<<< HEAD
   role = 'dokter'
   const canAccessMedicalRecord = role === 'dokter';
+=======
+
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
   if (!isOpen) return null;
 
   // Jika sedang edit mode atau create new
@@ -127,6 +145,20 @@ export default function RekamMedisModal({
                 </select>
               </div>
               
+<<<<<<< HEAD
+=======
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Waktu Perawatan</label>
+                <input
+                  type="datetime-local"
+                  name="waktuPerawatan"
+                  value={formData.waktuPerawatan}
+                  onChange={handleChange}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                  required
+                />
+              </div>
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
@@ -149,7 +181,11 @@ export default function RekamMedisModal({
                 </button>
                 <button
                   type="submit"
+<<<<<<< HEAD
                   className="px-4 py-2 bg-[#FD7E14] text-white rounded-md hover:bg-blue-700"
+=======
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
                 >
                   Simpan
                 </button>
@@ -190,6 +226,15 @@ export default function RekamMedisModal({
               <p className="font-medium">{existingData.jenisPerawatan}</p>
             </div>
             
+<<<<<<< HEAD
+=======
+            <div>
+              <p className="text-sm text-gray-500">Waktu Perawatan</p>
+              <p className="font-medium">
+                {new Date(existingData.waktuPerawatan).toLocaleString('id-ID')}
+              </p>
+            </div>
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
             
             <div>
               <p className="text-sm text-gray-500">Catatan</p>
@@ -203,6 +248,7 @@ export default function RekamMedisModal({
               >
                 Tutup
               </button>
+<<<<<<< HEAD
               {canAccessMedicalRecord && (<button
                 onClick={handleEditClick}
                 className="px-4 py-2 bg-[#FD7E14] text-white rounded-md hover:bg-[#FD7E18] flex items-center gap-2"
@@ -210,6 +256,14 @@ export default function RekamMedisModal({
                 <FaEdit /> Edit
               </button>
               )}
+=======
+              <button
+                onClick={handleEditClick}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
+              >
+                <FaEdit /> Edit
+              </button>
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
             </div>
           </div>
         </div>
@@ -238,6 +292,7 @@ export default function RekamMedisModal({
             >
               OK
             </button>
+<<<<<<< HEAD
             {canAccessMedicalRecord && (<button
               onClick={handleCreateClick}
               className="px-4 py-2 bg-[#FD7E14] text-white rounded-md hover:bg-[#FD7E00]"
@@ -245,6 +300,14 @@ export default function RekamMedisModal({
               Create
             </button>
             )}
+=======
+            <button
+              onClick={handleCreateClick}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Create
+            </button>
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
           </div>
         </div>
       </div>

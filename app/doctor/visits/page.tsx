@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 'use client';
+=======
+"use client";
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
 
 import { useState } from 'react';
 import { FaPlus, FaFileMedical, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
@@ -13,8 +17,11 @@ type Kunjungan = {
   visitType: 'Walk-In' | 'Janji Temu' | 'Darurat';
   startTime: string;
   endTime: string;
+<<<<<<< HEAD
   dokterId: string;
   perawatId: string;
+=======
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
 };
 
 type RekamMedis = {
@@ -25,42 +32,67 @@ type RekamMedis = {
   waktuPerawatan: string;
 };
 
+<<<<<<< HEAD
 export default function VisitPage({ role }: VisitPageProps) {
+=======
+export default function VisitPage() {
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
   const router = useRouter();
   
   // State for visits data
   const [visits, setVisits] = useState<Kunjungan[]>([
     {
+<<<<<<< HEAD
       id: 'KJN001',
+=======
+      id: 'KJ-2023-001',
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
       clientId: 'CL-00123',
       petName: 'Max',
       petType: 'Kucing',
       visitType: 'Janji Temu',
       startTime: '2023-05-15T10:00:00',
       endTime: '2023-05-15T11:30:00',
+<<<<<<< HEAD
       dokterId: 'DR-001',
       perawatId: 'NR-001'
     },
     {
       id: 'KJN002',
+=======
+    },
+    {
+      id: 'KJ-2023-002',
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
       clientId: 'CL-00456',
       petName: 'Bella',
       petType: 'Anjing',
       visitType: 'Walk-In',
       startTime: '2023-05-16T14:00:00',
       endTime: '2023-05-16T15:15:00',
+<<<<<<< HEAD
       dokterId: 'DR-002',
       perawatId: 'NR-002'
+=======
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
     },
   ]);
 
   // State for medical records
   const [medicalRecords, setMedicalRecords] = useState<Record<string, RekamMedis>>({
+<<<<<<< HEAD
     'KJN001': {
       suhuTubuh: '38',
       beratBadan: '12.3',
       jenisPerawatan: 'Vaksinasi',
       catatan: 'Suhu tubuhnya sangat panas diperluka tindakan dengan segera',
+=======
+    'KJ-2023-001': {
+      suhuTubuh: '38',
+      beratBadan: '12.3',
+      jenisPerawatan: 'Vaksinasi',
+      catatan: 'Lorem Ipsum Dolor Sir Ahjirfbgfbjbnjvbnkg bhjbbjhj',
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
       waktuPerawatan: '2023-05-15T10:30:00',
     }
   });
@@ -81,6 +113,7 @@ export default function VisitPage({ role }: VisitPageProps) {
     visitType: 'Walk-In',
     startTime: '',
     endTime: '',
+<<<<<<< HEAD
     dokterId: '',
     perawatId: ''
   });
@@ -96,6 +129,10 @@ export default function VisitPage({ role }: VisitPageProps) {
     { id: 'NR-002', name: 'Emily Wilson' }
   ];
 
+=======
+  });
+
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
   const formatDateTime = (isoString: string) => {
     const date = new Date(isoString);
     return date.toLocaleDateString('id-ID', {
@@ -132,8 +169,11 @@ export default function VisitPage({ role }: VisitPageProps) {
       visitType: kunjungan.visitType,
       startTime: kunjungan.startTime,
       endTime: kunjungan.endTime,
+<<<<<<< HEAD
       dokterId: kunjungan.dokterId,
       perawatId: kunjungan.perawatId
+=======
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
     });
     setShowUpdateModal(true);
   };
@@ -180,8 +220,11 @@ export default function VisitPage({ role }: VisitPageProps) {
       visitType: 'Walk-In',
       startTime: '',
       endTime: '',
+<<<<<<< HEAD
       dokterId: '',
       perawatId: ''
+=======
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
     });
   };
 
@@ -232,6 +275,7 @@ export default function VisitPage({ role }: VisitPageProps) {
           </div>
 
           <div className="mb-4">
+<<<<<<< HEAD
             <label className="block text-sm font-medium text-gray-700 mb-1">Dokter Hewan</label>
             <select
               name="dokterId"
@@ -265,6 +309,9 @@ export default function VisitPage({ role }: VisitPageProps) {
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">Metode Kunjungan</label>
+=======
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tipe Kunjungan</label>
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
             <select
               name="visitType"
               value={formData.visitType}
@@ -312,7 +359,11 @@ export default function VisitPage({ role }: VisitPageProps) {
             </button>
             <button
               type="submit"
+<<<<<<< HEAD
               className="px-4 py-2 bg-[#FD7E14] text-white rounded-md hover:bg-[#FD7E14]"
+=======
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
             >
               {isCreate ? 'Buat' : 'Update'}
             </button>
@@ -346,7 +397,11 @@ export default function VisitPage({ role }: VisitPageProps) {
           </button>
           <button
             onClick={handleDelete}
+<<<<<<< HEAD
             className="px-4 py-2 bg-[#FD7E14] text-white rounded-md hover:bg-red-700"
+=======
+            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
           >
             Hapus
           </button>
@@ -355,9 +410,12 @@ export default function VisitPage({ role }: VisitPageProps) {
     </div>
   );
 
+<<<<<<< HEAD
   role = 'front-desk'
   const canEditDelete = role === 'front-desk';
 
+=======
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
   return (
     <div
     className="min-h-screen bg-cover bg-center px-4 py-10"
@@ -369,13 +427,20 @@ export default function VisitPage({ role }: VisitPageProps) {
       </div>
 
       <div className="mb-4 flex justify-end">
+<<<<<<< HEAD
         {canEditDelete && (<button
+=======
+        <button
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
           onClick={() => setShowCreateModal(true)}
           className="bg-[#FD7E14] hover:bg-[#E67112] text-white px-4 py-2 rounded-md"
         >
           + Buat Kunjungan Baru
         </button>
+<<<<<<< HEAD
         )}
+=======
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
       </div>
 
 
@@ -399,7 +464,11 @@ export default function VisitPage({ role }: VisitPageProps) {
                 <td className="px-4 py-3 whitespace-nowrap text-sm">{visit.id}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm">{visit.clientId}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm">
+<<<<<<< HEAD
                   {visit.petName}
+=======
+                  {visit.petName} ({visit.petType})
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -413,7 +482,11 @@ export default function VisitPage({ role }: VisitPageProps) {
                 <td className="px-4 py-3 whitespace-nowrap text-sm">{formatDateTime(visit.startTime)}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm">{formatDateTime(visit.endTime)}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm">
+<<<<<<< HEAD
                     <button 
+=======
+                  <button 
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
                     onClick={() => handleShowMedicalRecord(visit.id)}
                     className="text-blue-600 hover:text-blue-800 inline-flex items-center"
                   >
@@ -422,19 +495,31 @@ export default function VisitPage({ role }: VisitPageProps) {
                   </button>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm space-x-2">
+<<<<<<< HEAD
                   {canEditDelete && (<button 
+=======
+                  <button 
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
                     onClick={() => prepareUpdate(visit)}
                     className="text-blue-600 hover:text-blue-800"
                   >
                     <FaEdit />
                   </button>
+<<<<<<< HEAD
                   )}
                   {canEditDelete && (<button 
+=======
+                  <button 
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
                     onClick={() => prepareDelete(visit.id)}
                     className="text-red-600 hover:text-red-800"
                   >
                     <FaTrash />
+<<<<<<< HEAD
                   </button>)}
+=======
+                  </button>
+>>>>>>> 90243197f2e4414c32dd89fb385600ebb6823363
                 </td>
               </tr>
             ))}
