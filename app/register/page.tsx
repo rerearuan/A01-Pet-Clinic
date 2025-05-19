@@ -2,16 +2,15 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { PlusIcon } from '../../components/Icons';
 
 export default function RegisterPage() {
   const router = useRouter();
   const roles = [
-    { id: 'front-desk-officer', name: 'Front Desk Officer', category: 'Pegawai' },
-    { id: 'dokter-hewan',         name: 'Dokter Hewan',        category: 'Pegawai' },
-    { id: 'perawat-hewan',       name: 'Perawat Hewan',      category: 'Pegawai' },
-    { id: 'individu',            name: 'Klien Individu',     category: 'Klien'   },
-    { id: 'perusahaan',          name: 'Klien Perusahaan',   category: 'Klien'   }
+    { id: 'front-desk', name: 'Front Desk Officer', category: 'Pegawai' },
+    { id: 'dokter-hewan', name: 'Dokter Hewan', category: 'Pegawai' },
+    { id: 'perawat-hewan', name: 'Perawat Hewan', category: 'Pegawai' },
+    { id: 'individu', name: 'Klien Individu', category: 'Klien' },
+    { id: 'perusahaan', name: 'Klien Perusahaan', category: 'Klien' }
   ];
 
   const grouped = roles.reduce<Record<string, typeof roles>>((acc, r) => {
