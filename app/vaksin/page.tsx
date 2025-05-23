@@ -53,18 +53,18 @@ type Vaccination = {
 };
 
 const dummyVaccinations: Vaccination[] = [
-  { id: 1, kunjungan: '5560bc1e-279a-416c-a77f-b7de0dbbcf36', tanggalKunjungan: 'Rabu, 5 Februari 2025', vaksin: 'VAC001 - Feline Panleukopenia' },
-  { id: 2, kunjungan: '20a9cbc8-6e58-4b3a-8337-9e393471ed9e', tanggalKunjungan: 'Jumat, 21 Februari 2025', vaksin: 'VAC002 - Canine Parvovirus' },
-  { id: 3, kunjungan: '42368349-dd67-47e6-84be-5678a6509288', tanggalKunjungan: 'Selasa, 15 Maret 2025', vaksin: 'VAC003 - Canine Adenovirus' },
+  { id: 1, kunjungan: 'KJN001', tanggalKunjungan: 'Rabu, 5 Februari 2025', vaksin: 'VAC001 - Feline Panleukopenia' },
+  { id: 2, kunjungan: 'KJN002', tanggalKunjungan: 'Jumat, 21 Februari 2025', vaksin: 'VAC002 - Canine Parvovirus' },
+  { id: 3, kunjungan: 'KJN003', tanggalKunjungan: 'Selasa, 15 Maret 2025', vaksin: 'VAC003 - Canine Adenovirus' },
 ];
 
 // Sample data for dropdowns
 const kunjunganOptions = [
-  { value: '5560bc1e-279a-416c-a77f-b7de0dbbcf36', label: '5560bc1e-279a-416c-a77f-b7de0dbbcf36' },
-  { value: '20a9cbc8-6e58-4b3a-8337-9e393471ed9e', label: '20a9cbc8-6e58-4b3a-8337-9e393471ed9e' },
-  { value: '42368349-dd67-47e6-84be-5678a6509288', label: '42368349-dd67-47e6-84be-5678a6509288' },
-  { value: 'b861e0fa-e1d0-47b0-a232-7993a960910c', label: 'b861e0fa-e1d0-47b0-a232-7993a960910c' },
-  { value: '33d6acd4-5731-4e1e-a19b-4379dd4ce388', label: '33d6acd4-5731-4e1e-a19b-4379dd4ce388' },
+  { value: 'KJN001', label: 'KJN001' },
+  { value: 'KJN002', label: 'KJN002' },
+  { value: 'KJN003', label: 'KJN003' },
+  { value: 'KJN004', label: 'KJN004' },
+  { value: 'KJN005', label: 'KJN005' },
 ];
 
 const vaksinOptions = [
