@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import NonLoginNavbar from "@/components/NonLoginNavbar"; 
+import ClientNavbar from "@/components/ClientNavbar";
+import FrontDeskNavbar from "@/components/FrontDeskNavbar";
+import DoctorNavbar from "@/components/DoctorNavbar";
+import NurseNavbar from "@/components/NurseNavbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +32,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <NonLoginNavbar/>
+        
+        <main className="min-h-screen">
         {children}
+        </main>
+        
       </body>
     </html>
   );

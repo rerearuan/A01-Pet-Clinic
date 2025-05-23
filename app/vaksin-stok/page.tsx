@@ -2,6 +2,21 @@
 
 import { useState } from 'react';
 
+// Custom icons
+const PlusIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19"></line>
+    <line x1="5" y1="12" x2="19" y2="12"></line>
+  </svg>
+);
+
+const SearchIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8"></circle>
+    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+  </svg>
+);
+
 type Vaccine = {
   id: string;
   name: string;
@@ -23,201 +38,274 @@ export default function VaccineStockPage() {
   const [modalType, setModalType] = useState<'create' | 'update' | 'updateStock' | 'delete' | null>(null);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-10">
-      <div className="max-w-7xl mx-auto bg-white p-8 rounded-2xl shadow-lg space-y-8">
-
+    <div className="min-h-screen bg-gray-50 px-4 py-8">
+      <main className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-800">List Vaccine</h1>
-          <button
-            onClick={() => {
-              setSelectedVaccine(null);
-              setModalType('create');
-            }}
-            className="bg-black hover:bg-gray-900 text-white font-semibold px-6 py-3 rounded-lg transition"
-          >
-            + Add New Vaccine
-          </button>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-6">List Vaccine</h1>
+
+          <div className="flex justify-end mb-6">
+            <button
+              onClick={() => {
+                setSelectedVaccine(null);
+                setModalType('create');
+              }}
+              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full flex items-center gap-2 transition-colors shadow-md"
+            >
+              <PlusIcon />
+              <span>Create New Vaccine</span>
+            </button>
+          </div>
         </div>
 
         {/* Search Bar */}
-        <div className="flex">
-          <input
-            type="text"
-            placeholder="Search Vaccine Name"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border border-gray-300 rounded-l-lg p-3 w-full text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
-          />
-          <button className="bg-black text-white px-4 rounded-r-lg">
-            🔍
-          </button>
+        <div className="mb-6">
+          <div className="flex">
+            <input
+              type="text"
+              placeholder="Search Vaccine Name"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="border border-gray-300 rounded-l-lg p-3 w-full text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-300"
+            />
+            <button className="bg-orange-500 text-white p-3 rounded-r-lg">
+              <SearchIcon />
+            </button>
+          </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto rounded-xl border border-gray-200">
-          <table className="min-w-full text-sm text-gray-700">
-            <thead className="bg-gray-100 text-gray-600 uppercase tracking-wide text-xs">
-              <tr>
-                <th className="py-4 px-6 text-center">No</th>
-                <th className="py-4 px-6">ID Vaksin</th>
-                <th className="py-4 px-6">Nama Vaksin</th>
-                <th className="py-4 px-6">Harga</th>
-                <th className="py-4 px-6">Stok</th>
-                <th className="py-4 px-6 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {vaccines
-                .filter((vaccine) => vaccine.name.toLowerCase().includes(search.toLowerCase()))
-                .map((vaccine, index) => (
-                  <tr key={vaccine.id} className="border-t hover:bg-gray-50">
-                    <td className="py-5 px-6 text-center">{index + 1}</td>
-                    <td className="py-5 px-6">{vaccine.id}</td>
-                    <td className="py-5 px-6">{vaccine.name}</td>
-                    <td className="py-5 px-6">Rp{vaccine.price.toLocaleString('id-ID')}</td>
-                    <td className="py-5 px-6">{vaccine.stock}</td>
-                    <td className="py-5 px-6 flex justify-center space-x-2">
-                      <button
-                        onClick={() => {
-                          setSelectedVaccine(vaccine);
-                          setModalType('updateStock');
-                        }}
-                        className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-xs font-semibold"
-                      >
-                        Update Stock
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedVaccine(vaccine);
-                          setModalType('update');
-                        }}
-                        className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-xs font-semibold"
-                      >
-                        Update
-                      </button>
-                      {!vaccine.used && (
-                        <button
-                          onClick={() => {
-                            setSelectedVaccine(vaccine);
-                            setModalType('delete');
-                          }}
-                          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-semibold"
-                        >
-                          Delete
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+        {/* Table Header */}
+        <div className="bg-white rounded-2xl shadow-sm mb-4 overflow-hidden">
+          <div className="grid grid-cols-6 bg-gray-50">
+            <div className="py-4 text-center text-sm font-bold text-gray-800">No</div>
+            <div className="py-4 text-center text-sm font-bold text-gray-800">ID Vaksin</div>
+            <div className="py-4 text-center text-sm font-bold text-gray-800">Nama Vaksin</div>
+            <div className="py-4 text-center text-sm font-bold text-gray-800">Harga</div>
+            <div className="py-4 text-center text-sm font-bold text-gray-800">Stok</div>
+            <div className="py-4 text-center font-bold text-gray-800 w-48">Action</div>
+          </div>
         </div>
 
-      </div>
+        {/* Table Content */}
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          {vaccines
+            .filter((vaccine) => vaccine.name.toLowerCase().includes(search.toLowerCase()))
+            .map((vaccine, index) => (
+              <div
+                key={vaccine.id}
+                className="grid grid-cols-6 items-center border-b last:border-b-0 border-gray-100 hover:bg-gray-50"
+              >
+                <div className="py-4 text-sm text-gray-700 text-center">{index + 1}</div>
+                <div className="py-4 text-sm text-gray-700 text-center">{vaccine.id}</div>
+                <div className="py-4 text-sm text-gray-700 text-center">{vaccine.name}</div>
+                <div className="py-4 text-sm text-gray-700 text-center">Rp{vaccine.price.toLocaleString('id-ID')}</div>
+                <div className="py-4 text-sm text-gray-700 text-center">{vaccine.stock}</div>
+                <div className="py-4 flex justify-center space-x-2 w-48">
+                  <button
+                    onClick={() => {
+                      setSelectedVaccine(vaccine);
+                      setModalType('updateStock');
+                    }}
+                    className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1 rounded-lg text-xs font-semibold"
+                  >
+                    Update Stock
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedVaccine(vaccine);
+                      setModalType('update');
+                    }}
+                    className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-lg text-xs font-semibold"
+                  >
+                    Update
+                  </button>
+                  {!vaccine.used && (
+                    <button
+                      onClick={() => {
+                        setSelectedVaccine(vaccine);
+                        setModalType('delete');
+                      }}
+                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs font-semibold"
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+        </div>
+      </main>
 
-      {/* Modal */}
-      {modalType && (
-        <Modal
-          type={modalType}
-          vaccine={selectedVaccine}
-          onClose={() => {
-            setSelectedVaccine(null);
-            setModalType(null);
-          }}
-        />
+      {/* Modals */}
+      {modalType === 'create' && (
+        <CreateVaccineModal onClose={() => setModalType(null)} />
+      )}
+      {modalType === 'update' && selectedVaccine && (
+        <UpdateVaccineModal vaccine={selectedVaccine} onClose={() => setModalType(null)} />
+      )}
+      {modalType === 'updateStock' && selectedVaccine && (
+        <UpdateStockModal vaccine={selectedVaccine} onClose={() => setModalType(null)} />
+      )}
+      {modalType === 'delete' && selectedVaccine && (
+        <DeleteVaccineModal vaccine={selectedVaccine} onClose={() => setModalType(null)} />
       )}
     </div>
   );
 }
 
-/* --- Modal Component --- */
-function Modal({
-  type,
-  vaccine,
-  onClose,
-}: {
-  type: 'create' | 'update' | 'updateStock' | 'delete';
-  vaccine: Vaccine | null;
-  onClose: () => void;
-}) {
+/* --- Modal Components --- */
+function CreateVaccineModal({ onClose }: { onClose: () => void }) {
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div className="bg-white p-8 rounded-xl shadow-xl w-96 space-y-6">
-        {type === 'create' && (
-          <>
-            <h2 className="text-2xl font-bold text-gray-800">Create New Vaccine</h2>
-            <div className="space-y-2">
-              <input placeholder="Nama" className="w-full border p-3 rounded-lg text-gray-800" />
-              <input placeholder="Harga" type="number" className="w-full border p-3 rounded-lg text-gray-800" />
-              <input placeholder="Stok Awal" type="number" className="w-full border p-3 rounded-lg text-gray-800" />
-            </div>
-            <div className="flex justify-end space-x-3 pt-4">
-              <button onClick={onClose} className="border px-4 py-2 rounded-lg text-gray-800">
-                Cancel
-              </button>
-              <button className="bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-lg">
-                Create
-              </button>
-            </div>
-          </>
-        )}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="bg-white rounded-2xl p-8 shadow-xl w-full max-w-md space-y-6">
+        <h2 className="text-2xl font-bold text-gray-800">Create New Vaccine</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-gray-700 font-semibold mb-1">Nama Vaksin</label>
+            <input type="text" placeholder="Masukkan nama vaksin" className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700" />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-semibold mb-1">Harga</label>
+            <input type="number" placeholder="Masukkan harga" className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700" />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-semibold mb-1">Stok Awal</label>
+            <input type="number" placeholder="Masukkan stok awal" className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700" />
+          </div>
+        </div>
+        <div className="flex justify-end gap-4 pt-4">
+          <button
+            onClick={onClose}
+            className="bg-white border border-gray-300 text-gray-700 font-semibold px-6 py-2 rounded-lg hover:bg-gray-100 transition"
+          >
+            Cancel
+          </button>
+          <button
+            className="bg-orange-500 text-white font-semibold px-6 py-2 rounded-lg hover:opacity-90 transition"
+          >
+            Create
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-        {type === 'update' && vaccine && (
-          <>
-            <h2 className="text-2xl font-bold text-gray-800">Update Vaccine</h2>
-            <div className="space-y-2">
-              <input value={vaccine.id} disabled className="w-full border p-3 rounded-lg bg-gray-100 text-gray-800" />
-              <input placeholder="Nama Vaksin" className="w-full border p-3 rounded-lg text-gray-800" />
-              <input placeholder="Harga" type="number" className="w-full border p-3 rounded-lg text-gray-800" />
-            </div>
-            <div className="flex justify-end space-x-3 pt-4">
-              <button onClick={onClose} className="border px-4 py-2 rounded-lg text-gray-800">
-                Cancel
-              </button>
-              <button className="bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-lg">
-                Update
-              </button>
-            </div>
-          </>
-        )}
+function UpdateVaccineModal({ vaccine, onClose }: { vaccine: Vaccine; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="bg-white rounded-2xl p-8 shadow-xl w-full max-w-md space-y-6">
+        <h2 className="text-2xl font-bold text-gray-800">Update Vaccine</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-gray-700 font-semibold mb-1">ID Vaksin</label>
+            <input 
+              type="text" 
+              value={vaccine.id} 
+              disabled 
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-100 text-gray-700" 
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-semibold mb-1">Nama Vaksin</label>
+            <input 
+              type="text" 
+              defaultValue={vaccine.name}
+              placeholder="Masukkan nama vaksin" 
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700" 
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-semibold mb-1">Harga</label>
+            <input 
+              type="number" 
+              defaultValue={vaccine.price}
+              placeholder="Masukkan harga" 
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700" 
+            />
+          </div>
+        </div>
+        <div className="flex justify-end gap-4 pt-4">
+          <button
+            onClick={onClose}
+            className="bg-white border border-gray-300 text-gray-700 font-semibold px-6 py-2 rounded-lg hover:bg-gray-100 transition"
+          >
+            Cancel
+          </button>
+          <button
+            className="bg-orange-500 text-white font-semibold px-6 py-2 rounded-lg hover:opacity-90 transition"
+          >
+            Update
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-        {type === 'updateStock' && vaccine && (
-          <>
-            <h2 className="text-2xl font-bold text-gray-800">Update Vaccine Stock</h2>
-            <p className="text-gray-600">{vaccine.id} - {vaccine.name}</p>
-            <div className="space-y-2 pt-2">
-              <input placeholder="Stok" type="number" className="w-full border p-3 rounded-lg text-gray-800" />
-            </div>
-            <div className="flex justify-end space-x-3 pt-4">
-              <button onClick={onClose} className="border px-4 py-2 rounded-lg text-gray-800">
-                Cancel
-              </button>
-              <button className="bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-lg">
-                Update Stock
-              </button>
-            </div>
-          </>
-        )}
+function UpdateStockModal({ vaccine, onClose }: { vaccine: Vaccine; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="bg-white rounded-2xl p-8 shadow-xl w-full max-w-md space-y-6">
+        <h2 className="text-2xl font-bold text-gray-800">Update Vaccine Stock</h2>
+        <p className="text-gray-600">{vaccine.id} - {vaccine.name}</p>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-gray-700 font-semibold mb-1">Stok</label>
+            <input 
+              type="number" 
+              defaultValue={vaccine.stock}
+              placeholder="Masukkan stok" 
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700" 
+            />
+          </div>
+        </div>
+        <div className="flex justify-end gap-4 pt-4">
+          <button
+            onClick={onClose}
+            className="bg-white border border-gray-300 text-gray-700 font-semibold px-6 py-2 rounded-lg hover:bg-gray-100 transition"
+          >
+            Cancel
+          </button>
+          <button
+            className="bg-orange-500 text-white font-semibold px-6 py-2 rounded-lg hover:opacity-90 transition"
+          >
+            Update Stock
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-        {type === 'delete' && vaccine && (
-        <>
-            <h2 className="text-2xl font-bold text-red-600">Delete Vaccine</h2>
-            <p className="text-gray-700">
-            Apakah kamu yakin ingin menghapus Vaksin{' '}
-            <b className="text-red-600">{vaccine.name}</b> dengan{' '}
-            <b className="text-red-600">{vaccine.id}</b>?
+function DeleteVaccineModal({ vaccine, onClose }: { vaccine: Vaccine; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="bg-white rounded-2xl p-8 shadow-xl w-full max-w-md">
+        <div className="space-y-6">
+          <h2 className="text-3xl font-bold text-orange-500 text-center">Delete Vaccine</h2>
+          
+          <div className="text-center space-y-1">
+            <p className="text-black font-medium">Apakah kamu yakin ingin menghapus Vaksin</p>
+            <p className="text-black font-bold">
+              <span className="text-orange-500">{vaccine.name}</span> dengan ID <span className="text-orange-500">{vaccine.id}</span> ?
             </p>
-            <div className="flex justify-center space-x-3 pt-6">
-            <button onClick={onClose} className="border px-4 py-2 rounded-lg text-gray-800">
-                Cancel
+          </div>
+          
+          <div className="flex justify-center gap-4 pt-4">
+            <button
+              onClick={onClose}
+              className="bg-white border border-gray-300 text-gray-700 font-semibold px-8 py-2 rounded-lg hover:bg-gray-100 transition min-w-32"
+            >
+              Cancel
             </button>
-            <button className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg">
-                Confirm Deletion
+            <button
+              className="bg-orange-500 text-white font-semibold px-8 py-2 rounded-lg hover:opacity-90 transition min-w-32"
+            >
+              Delete
             </button>
-            </div>
-        </>
-        )}
+          </div>
+        </div>
       </div>
     </div>
   );
