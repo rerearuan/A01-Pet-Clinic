@@ -49,7 +49,7 @@ export async function PUT(request: Request) {
     } = await request.json();
 
     // Validasi input
-    if (!id || !startTime || !endTime) {
+    if (!id || !startTime) {
       return NextResponse.json(
         { success: false, message: 'Required fields missing' },
         { status: 400 }
@@ -58,9 +58,10 @@ export async function PUT(request: Request) {
 
     // Pastikan format DateTime
     const startDate = new Date(startTime);
-    const endDate = new Date(endTime);
+
+    const endDate = endTime ? new Date(endTime) : null;
     
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    if (isNaN(startDate.getTime()) ||   (endDate !== null && isNaN(endDate.getTime()))){
       return NextResponse.json(
         { success: false, message: 'Invalid date format' },
         { status: 400 }
@@ -134,7 +135,7 @@ export async function POST(request: Request) {
     
 
     // Validasi input
-    if (!clientId || !petName || !startTime || !endTime) {
+    if (!clientId || !petName || !startTime) {
       return NextResponse.json(
         { success: false, message: 'Required fields missing' },
         { status: 400 }
@@ -143,7 +144,7 @@ export async function POST(request: Request) {
 
     // Validasi format tanggal
     const startDate = new Date(startTime);
-    const endDate = new Date(endTime);
+    const endDate = endTime ? new Date(endTime) : null;
     
     if (isNaN(startDate.getTime())) {
       return NextResponse.json(
@@ -152,7 +153,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (isNaN(endDate.getTime())) {
+    if (endDate !== null && isNaN(endDate.getTime())) {
       return NextResponse.json(
         { success: false, message: 'Invalid end time format' },
         { status: 400 }
