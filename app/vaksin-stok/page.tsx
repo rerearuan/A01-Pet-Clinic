@@ -145,7 +145,9 @@ export default function VaccineStockPage() {
                     >
                       Delete
                     </button>
+
                   )}
+
                 </div>
               </div>
             ))}
@@ -332,20 +334,26 @@ function DeleteVaccineModal({ vaccine, onClose }: { vaccine: Vaccine; onClose: (
   const [error, setError] = useState('');
 
   const handleDelete = async () => {
-    const res = await fetch('/api/vaccine-stok/delete', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ kode: vaccine.id }),
-    });
+    try {
+      const res = await fetch('/api/vaccine-stok/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kode: vaccine.id }),
+      });
 
-    const result = await res.json();
-    if (!res.ok) {
-      setError(result.error || 'Gagal menghapus vaksin');
-      return;
+      const result = await res.json();
+
+      if (!res.ok) {
+        setError(result.error || 'Gagal menghapus vaksin');
+        return;
+      }
+
+      onClose();
+    } catch (err: any) {
+      setError('Gagal menghapus vaksin: ' + err.message);
     }
-
-    onClose();
   };
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">

@@ -1,52 +1,49 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-export default function DashboardPage() {
-  const [showConfirmLogout, setShowConfirmLogout] = useState(false);
+export default function LogoutPage() {
   const router = useRouter();
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  useEffect(() => {
+    setShowConfirm(true);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
-    router.push('/login');
+    router.push('/dashboard');
+  };
+
+  const handleCancel = () => {
+    router.back(); 
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md text-center">
-        <h1 className="text-2xl font-bold mb-4">Welcome to Dashboard</h1>
-
-        <button
-          onClick={() => setShowConfirmLogout(true)}
-          className="mt-4 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-6 rounded-lg transition"
-        >
-          Logout
-        </button>
-
-        {/* Modal popup */}
-        {showConfirmLogout && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-80">
-              <h2 className="text-lg font-bold mb-4 text-center">Yakin mau logout?</h2>
-              <div className="flex justify-around">
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg"
-                >
-                  Ya
-                </button>
-                <button
-                  onClick={() => setShowConfirmLogout(false)}
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded-lg"
-                >
-                  Tidak
-                </button>
-              </div>
-            </div>
+    <div
+      className="min-h-screen bg-cover bg-center flex items-center justify-center"
+      style={{ backgroundImage: "url('/background.png')" }}
+    >
+      {showConfirm && (
+        <div className="bg-white rounded-xl p-8 shadow-2xl w-full max-w-md text-center space-y-6">
+          <h2 className="text-2xl font-bold text-gray-800">Are you sure want to logout?</h2>
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={handleLogout}
+              className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-2 rounded-lg transition"
+            >
+              Yes
+            </button>
+            <button
+              onClick={handleCancel}
+              className="bg-white border border-orange-500 text-orange-600 hover:bg-orange-50 font-semibold px-6 py-2 rounded-lg transition"
+            >
+              No
+            </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

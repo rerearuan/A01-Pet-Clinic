@@ -45,23 +45,25 @@ export default function VaccinationPage() {
   const [selectedVaccination, setSelectedVaccination] = useState<Vaccination | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
+  useEffect(() => {
+    fetchVaccinations();
+    fetchDropdowns();
+  }, []);
+
   const fetchVaccinations = async () => {
     setLoading(true);
     const res = await fetch('/api/vaksin');
     const data = await res.json();
-
     const filtered = data
       .filter((item: any) => item.vaksin !== null)
       .sort((a: any, b: any) => new Date(a.tanggal_kunjungan).getTime() - new Date(b.tanggal_kunjungan).getTime());
 
-    setVaccinations(
-      filtered.map((item: any) => ({
-        id: item.id_kunjungan,
-        kunjungan: item.id_kunjungan,
-        tanggalKunjungan: item.tanggal_kunjungan,
-        vaksin: item.vaksin,
-      }))
-    );
+    setVaccinations(filtered.map((item: any) => ({
+      id: item.id_kunjungan,
+      kunjungan: item.id_kunjungan,
+      tanggalKunjungan: item.tanggal_kunjungan,
+      vaksin: item.vaksin,
+    })));
     setLoading(false);
   };
 
@@ -82,11 +84,6 @@ export default function VaccinationPage() {
     })));
   };
 
-  useEffect(() => {
-    fetchVaccinations();
-    fetchDropdowns();
-  }, []);
-
   const handleEditClick = (vacc: Vaccination) => {
     setSelectedVaccination(vacc);
     setShowUpdateModal(true);
@@ -104,7 +101,10 @@ export default function VaccinationPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">List Vaccination</h1>
           <div className="flex justify-end mb-6">
-            <button onClick={() => setShowCreateModal(true)} className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full flex items-center gap-2 transition-colors shadow-md">
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full flex items-center gap-2 transition-colors shadow-md"
+            >
               <PlusIcon />
               <span>Create New Vaccination</span>
             </button>
@@ -113,11 +113,11 @@ export default function VaccinationPage() {
 
         <div className="bg-white rounded-2xl shadow-sm mb-4 overflow-hidden">
           <div className="grid grid-cols-5 bg-gray-50">
-            <div className="py-4 text-center text-sm font-bold text-gray-800">No</div>
-            <div className="py-4 text-center text-sm font-bold text-gray-800">Kunjungan</div>
-            <div className="py-4 text-center text-sm font-bold text-gray-800">Tanggal Kunjungan</div>
-            <div className="py-4 text-center text-sm font-bold text-gray-800">Vaksin</div>
-            <div className="py-4 text-center text-sm font-bold text-gray-800">Action</div>
+            <HeaderCell>NO</HeaderCell>
+            <HeaderCell>KUNJUNGAN</HeaderCell>
+            <HeaderCell>TANGGAL</HeaderCell>
+            <HeaderCell>VAKSIN</HeaderCell>
+            <HeaderCell>ACTION</HeaderCell>
           </div>
         </div>
 
@@ -129,14 +129,14 @@ export default function VaccinationPage() {
           ) : (
             vaccinations.map((vaksin, index) => (
               <div key={vaksin.id} className="grid grid-cols-5 items-center border-b last:border-b-0 border-gray-100 hover:bg-orange-50">
-                <div className="py-4 text-sm text-gray-700 text-center">{index + 1}</div>
-                <div className="py-4 text-sm text-gray-700 text-center">{vaksin.kunjungan}</div>
-                <div className="py-4 text-sm text-gray-700 text-center">{vaksin.tanggalKunjungan}</div>
-                <div className="py-4 text-sm text-gray-700 text-center">{vaksin.vaksin}</div>
+                <Cell>{index + 1}</Cell>
+                <Cell>{vaksin.kunjungan}</Cell>
+                <Cell>{vaksin.tanggalKunjungan}</Cell>
+                <Cell>{vaksin.vaksin}</Cell>
                 <div className="py-4 text-center">
-                  <div className="flex justify-center space-x-3">
-                    <button onClick={() => handleEditClick(vaksin)} className="bg-blue-100 hover:bg-blue-200 text-blue-600 p-2 rounded-full transition-colors"><EditIcon /></button>
-                    <button onClick={() => handleDeleteClick(vaksin)} className="bg-red-100 hover:bg-red-200 text-red-600 p-2 rounded-full transition-colors"><TrashIcon /></button>
+                  <div className="flex justify-center gap-2">
+                    <button onClick={() => handleEditClick(vaksin)} className="p-2 text-blue-600 hover:bg-blue-100 rounded-full"><EditIcon /></button>
+                    <button onClick={() => handleDeleteClick(vaksin)} className="p-2 text-red-600 hover:bg-red-100 rounded-full"><TrashIcon /></button>
                   </div>
                 </div>
               </div>
@@ -165,11 +165,23 @@ export default function VaccinationPage() {
           />
         )}
         {showDeleteModal && selectedVaccination && (
-          <DeleteModal vaccination={selectedVaccination} onClose={() => setShowDeleteModal(false)} onSuccess={fetchVaccinations} />
+          <DeleteModal
+            vaccination={selectedVaccination}
+            onClose={() => setShowDeleteModal(false)}
+            onSuccess={fetchVaccinations}
+          />
         )}
       </main>
     </div>
   );
+}
+
+function Cell({ children }: { children: React.ReactNode }) {
+  return <div className="py-4 text-sm text-gray-700 text-center">{children}</div>;
+}
+
+function HeaderCell({ children }: { children: React.ReactNode }) {
+  return <div className="py-4 text-center text-sm font-bold text-gray-800">{children}</div>;
 }
 
 function ErrorModal({ message, onClose }: { message: string; onClose: () => void }) {
@@ -177,7 +189,7 @@ function ErrorModal({ message, onClose }: { message: string; onClose: () => void
     <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full text-center space-y-4 z-[1000]">
         <h2 className="text-xl font-semibold text-red-600">Terjadi Kesalahan</h2>
-        <p className="text-gray-800">{message}</p>
+        <p className="text-gray-800 whitespace-pre-line">{message}</p>
         <button
           onClick={onClose}
           className="bg-orange-500 text-white font-semibold px-6 py-2 rounded-lg hover:opacity-90"
@@ -188,6 +200,7 @@ function ErrorModal({ message, onClose }: { message: string; onClose: () => void
     </div>
   );
 }
+
 
 // === VaccinationModal ===
 function VaccinationModal({
@@ -227,10 +240,10 @@ function VaccinationModal({
 
     const label = vaksinOptions.find(v => v.value === selectedVaksin)?.label || '';
     const stokMatch = label.match(/\[(\d+)\]/);
-    if (stokMatch && parseInt(stokMatch[1]) === 0) {
-      setErrorMessage('Stok Vaksin yang dipilih sudah habis');
-      return;
-    }
+    // if (stokMatch && parseInt(stokMatch[1]) === 0) {
+    //   setErrorMessage('Stok Vaksin yang dipilih sudah habis');
+    //   return;
+    // }
 
     const method = isUpdate ? 'PUT' : 'POST';
     const url = isUpdate ? '/api/vaksin/update' : '/api/vaksin/create';
