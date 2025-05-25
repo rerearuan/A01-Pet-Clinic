@@ -3,10 +3,9 @@
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from 'react';
 import { FaPlus, FaFileMedical, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
-import { useRouter } from 'next/navigation';
 import RekamMedisModal from './components/RekamMedisModal';
 // import { getSession } from '@/lib/auth-utils';
-
+import { ErrorDisplay } from "@/components/ErrorDisplya";
 
 type VisitType = 'Walk-In' | 'Janji Temu' | 'Darurat';
 export type StaffRole = 'front_desk' | 'dokter_hewan' | 'perawat_hewan';
@@ -18,7 +17,7 @@ interface Kunjungan {
   petType: string;
   visitType: VisitType;
   startTime: string;
-  endTime: string;
+  endTime?: string;
   frontDeskId: string;
   nurseId: string;
   doctorId: string;
@@ -60,43 +59,6 @@ interface AppState {
   loadingUsers: boolean;
   isLoadingMedicalRecord: boolean;
   error: string | null;
-}
-
-export function ErrorDisplay({
-  error,
-  onClose,
-}: {
-  error: string | null;
-  onClose: () => void;
-}) {
-  const [isVisible, setIsVisible] = useState(!!error);
-
-  useEffect(() => {
-    setIsVisible(!!error);
-  }, [error]);
-
-  if (!error || !isVisible) return null;
-
-  return (
-    <div className="relative p-4 mb-4 text-red-700 bg-white border border-red-300 rounded-lg shadow-sm">
-      <div className="flex items-start">
-        <span className="mr-2">⚠️</span>
-        <div className="flex-1">
-          <span className="font-medium"></span> {error}
-        </div>
-        <button
-          onClick={() => {
-            setIsVisible(false);
-            onClose();
-          }}
-          className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full"
-          aria-label="Close error message"
-        >
-          <span className="text-lg">&times;</span>
-        </button>
-      </div>
-    </div>
-  );
 }
 
 
@@ -275,7 +237,7 @@ export default function VisitPage() {
       petName: form.petName,
       visitType: form.visitType,
       startTime: new Date(form.startTime).toISOString(),
-      endTime: new Date(form.endTime).toISOString(),
+      endTime: form.endTime ? new Date(form.endTime).toISOString() : null,
       frontDeskId: form.frontDeskId,
       nurseId: form.nurseId,
       doctorId: form.doctorId
@@ -326,7 +288,7 @@ export default function VisitPage() {
       petName: form.petName,
       visitType: form.visitType,
       startTime: new Date(form.startTime).toISOString(),
-      endTime: new Date(form.endTime).toISOString(),
+      endTime: form.endTime ? new Date(form.endTime).toISOString() : null,
       frontDeskId: form.frontDeskId,
       nurseId: form.nurseId,
       doctorId: form.doctorId
@@ -459,7 +421,7 @@ const formatDateTimeForInput = (dateString: string) => {
         petName: kunjungan.petName,
         visitType: kunjungan.visitType,
         startTime: formatDateTimeForInput(kunjungan.startTime), // Gunakan formatter
-        endTime: formatDateTimeForInput(kunjungan.endTime),     // Gunakan formatter
+        endTime: kunjungan.endTime ? formatDateTimeForInput(kunjungan.endTime) : "",
         frontDeskId: kunjungan.frontDeskId,
         nurseId: kunjungan.nurseId,
         doctorId: kunjungan.doctorId
@@ -486,6 +448,7 @@ const formatDateTimeForInput = (dateString: string) => {
   const StaffSelect = ({ role, value, onChange }: {
     role: StaffRole;
     value: string;
+    disable:boolean;
     onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   }) => {
     const { data: session } = useSession();
@@ -533,7 +496,6 @@ const formatDateTimeForInput = (dateString: string) => {
             onChange={onChange}
             className="w-full p-2 border border-gray-300 rounded-md"
             required
-            disabled={state.loadingUsers || isCurrentUserField}
           >
             <option value="">
               {state.loadingUsers ? 'Memuat...' : `Pilih ${role === 'front_desk' ? 'Front Desk' : role === 'dokter_hewan' ? 'Dokter' : 'Perawat'}`}
@@ -641,9 +603,9 @@ const formatDateTimeForInput = (dateString: string) => {
           </div>
 
           {/* Staff Selection */}
-          <StaffSelect role="front_desk" value={form.frontDeskId} onChange={handleFormChange} disabled={userRole === "front_desk"}/>
-          <StaffSelect role="perawat_hewan" value={form.nurseId} onChange={handleFormChange} />
-          <StaffSelect role="dokter_hewan" value={form.doctorId} onChange={handleFormChange} />
+          <StaffSelect role="front_desk" value={form.frontDeskId} onChange={handleFormChange} disable={userRole === 'front-desk'}/>
+          <StaffSelect role="perawat_hewan" value={form.nurseId} onChange={handleFormChange} disable={false} />
+          <StaffSelect role="dokter_hewan" value={form.doctorId} onChange={handleFormChange} disable={false} />
           
 
           {/* Time Selection */}
@@ -670,10 +632,9 @@ const formatDateTimeForInput = (dateString: string) => {
               id="endTime"
               type="datetime-local"
               name="endTime"
-              value={formatDateTimeForInput(form.endTime)}
+              value={form.endTime ? formatDateTimeForInput(form.endTime) : ""}
               onChange={handleFormChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
             />
           </div>
 
@@ -796,7 +757,7 @@ const formatDateTimeForInput = (dateString: string) => {
                       </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm">{formatDateTime(visit.startTime)}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm">{formatDateTime(visit.endTime)}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">{visit.endTime ? formatDateTime(visit.endTime) : "-"}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm">
                       <button 
                         onClick={() => handleShowMedicalRecord(visit)}
@@ -834,18 +795,18 @@ const formatDateTimeForInput = (dateString: string) => {
         {modals.showUpdate && <VisitModal isCreate={false} />}
         {modals.showDelete && <DeleteModal />}
         {modals.showMedicalRecord && currentVisit.kunjungan && (
-          <RekamMedisModal
-            isOpen={modals.showMedicalRecord}
-            onClose={() => closeModal('medicalRecord')}
-            onSubmit={(data) => {
-              setState(prev => ({
-                ...prev,
-                medicalRecords: {
-                  ...prev.medicalRecords,
-                  [currentVisit.currentVisitId]: data
-                }
-              }));
-              closeModal('medicalRecord');
+        <RekamMedisModal
+          isOpen={modals.showMedicalRecord}
+          onClose={() => closeModal('medicalRecord')}
+          onSubmit={async (data) => {
+            setState(prev => ({
+              ...prev,
+              medicalRecords: {
+                ...prev.medicalRecords,
+                [currentVisit.currentVisitId]: data
+              }
+            }));
+            closeModal('medicalRecord');
             }}
             existingData={state.medicalRecords[currentVisit.currentVisitId]}
             isLoading={state.isLoadingMedicalRecord}

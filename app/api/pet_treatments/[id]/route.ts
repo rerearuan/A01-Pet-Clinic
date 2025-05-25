@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+
   
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 
   const session = await getServerSession(authOptions);
 
@@ -12,7 +13,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 
   try {
-    const id = params.id;
+    const { id } = await params;
     const body = await req.json();
 
     const {
@@ -86,13 +87,16 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
     if (!session || !session.user.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-  const id = params.id;
 
   try {
     const result = await pool.query(`

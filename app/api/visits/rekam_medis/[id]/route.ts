@@ -5,13 +5,13 @@ import { validate as isUUID } from 'uuid';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
-export async function PUT(req: NextRequest, context: { params: { id: string } }) {
+export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
 
     if (!session || !session.user.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-  const { id } = context.params;
+  const { id } = await context.params;
 
   try {
     // Validate ID first

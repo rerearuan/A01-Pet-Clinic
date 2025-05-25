@@ -7,7 +7,7 @@ import { authOptions } from '@/lib/auth-options';
 export async function DELETE(
   
   request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
   ) {
   
   const session = await getServerSession(authOptions);
@@ -17,7 +17,7 @@ export async function DELETE(
   }
   
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Validasi UUID
     if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {

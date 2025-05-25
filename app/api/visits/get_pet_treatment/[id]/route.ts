@@ -3,7 +3,7 @@ import pool from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }>}) {
   const session = await getServerSession(authOptions);
 
     if (!session || !session.user.email) {
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
   
     try {
-      const { id } = params;
+      const { id } = await params;
       const { nama_hewan, no_identitas_klien } = await req.json();
 
       if (!nama_hewan || !no_identitas_klien) {
