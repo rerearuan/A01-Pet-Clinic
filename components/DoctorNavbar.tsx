@@ -65,9 +65,9 @@ export default function DoctorNavbar() {
               {/* Dropdown Menu */}
               <div className="absolute top-full left-0 mt-0 w-56 bg-white rounded-b-md shadow-xl z-10 border-t-2 border-[#FD7E14] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                 <div className="py-2">
-                  <DropdownLink href="/doctor/manage/medicines" label="Manajemen Obat" />
-                  <DropdownLink href="/doctor/manage/treatment-types" label="Manajemen Jenis Perawatan" />
-                  <DropdownLink href="/doctor/manage/medication" label="Manajemen Pemberian Obat" />
+                  <DropdownLink href="/medicine" label="Manajemen Obat" />
+                  <DropdownLink href="/treatment" label="Manajemen Jenis Perawatan" />
+                  <DropdownLink href="/prescription" label="Manajemen Pemberian Obat" />
                   <DropdownLink href="/doctor/manage/vaccinations" label="Manajemen Vaksinasi Hewan" />
                 </div>
               </div>
@@ -98,9 +98,9 @@ export default function DoctorNavbar() {
               </Link>
               {/* Dropdown Menu expanded di mobile */}
               <div className="flex flex-col pl-4">
-                  <DropdownLink href="/doctor/manage/medicines" label="Manajemen Obat" />
-                  <DropdownLink href="/doctor/manage/treatment-types" label="Manajemen Jenis Perawatan" />
-                  <DropdownLink href="/doctor/manage/medication" label="Manajemen Pemberian Obat" />
+                  <DropdownLink href="/medicine" label="Manajemen Obat" />
+                  <DropdownLink href="/treatment" label="Manajemen Jenis Perawatan" />
+                  <DropdownLink href="/prescription" label="Manajemen Pemberian Obat" />
                   <DropdownLink href="/doctor/manage/vaccinations" label="Manajemen Vaksinasi Hewan" />
               </div>
             </div>
