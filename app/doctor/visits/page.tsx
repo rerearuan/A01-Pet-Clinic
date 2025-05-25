@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { FaPlus, FaFileMedical, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
 import RekamMedisModal from './components/RekamMedisModal';
 // import { getSession } from '@/lib/auth-utils';
-import { ErrorDisplay } from "@/components/ErrorDisplya";
+import { ErrorDisplay } from "./components/ErrorDisplay";
 
 type VisitType = 'Walk-In' | 'Janji Temu' | 'Darurat';
 export type StaffRole = 'front_desk' | 'dokter_hewan' | 'perawat_hewan';
@@ -307,6 +307,7 @@ export default function VisitPage() {
     const data = await response.json();
     
     // Update state dengan data terbaru
+    if(data.success){
     const updatedVisits = state.visits.map(v => 
       v.id === currentVisit.kunjungan?.id ? { 
         ...v,
@@ -319,14 +320,19 @@ export default function VisitPage() {
     setState(prev => ({ ...prev, visits: updatedVisits }));
     closeModal('update');
     resetForm();
-  } catch (error) {
-    const errorMessage = error instanceof Error 
-      ? error.message 
-      : 'Terjadi kesalahan saat memproses permintaan';
-    
-    setState(prev => ({ ...prev, error: errorMessage }));
+    setError(null);
+  } else {
+      setError(data.message || 'Terjadi kesalahan');
   }
-};
+    } catch (error) {
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Terjadi kesalahan saat memproses permintaan';
+      
+      setState(prev => ({ ...prev, error: errorMessage }));
+    }
+  };
+
   const handleDelete = async () => {
   if (!currentVisit.idToDelete) return;
 
