@@ -1,11 +1,9 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import NonLoginNavbar from "@/components/NonLoginNavbar"; 
-import ClientNavbar from "@/components/ClientNavbar";
-import FrontDeskNavbar from "@/components/FrontDeskNavbar";
-import DoctorNavbar from "@/components/DoctorNavbar";
-import NurseNavbar from "@/components/NurseNavbar";
+import { Providers } from "./providers";
+import DynamicNavbar from "@/components/dynamicNavbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,15 +27,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <NurseNavbar/>
-        
-        <main className="min-h-screen">
-        {children}
-        </main>
-        
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Providers>
+          <DynamicNavbar />
+          <main className="min-h-screen">
+            {children}
+          </main>
+        </Providers>
       </body>
     </html>
   );

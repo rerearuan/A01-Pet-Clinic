@@ -43,30 +43,31 @@ export default function ClientNavbar() {
           <div className="hidden md:flex items-center space-x-8 h-10">
             <NavLink href="/doctor" pathname={pathname} label="Dashboard" />
             <NavLink href="/doctor/pet-types" pathname={pathname} label="Kelola Hewan Peliharaan" />
-            <NavLink href="/doctor/pet_treatments" pathname={pathname} label="Daftar Kunjungan" />
+            <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
             <NavLink href="/vaccines-client" pathname={pathname} label="Daftar Vaksinasi" />
+            </div>
+            
+            {/* Logout Button */}
+            <div className="hidden md:flex items-center">
+              <Link
+                href="/api/auth/signout"
+                className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              >
+                Logout
+              </Link>
+            </div>
           </div>
-
-          {/* Logout Button */}
-          <div className="hidden md:flex items-center">
-            <Link
-              href="/logout"
-              className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
-            >
-              Logout
-            </Link>
-          </div>
-        </div>
+          
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden flex flex-col space-y-4 mt-4">
             <NavLink href="/doctor" pathname={pathname} label="Dashboard" />
             <NavLink href="/doctor/pet-types" pathname={pathname} label="Kelola Hewan Peliharaan" />
-            <NavLink href="/doctor/pet_treatments" pathname={pathname} label="Daftar Kunjungan" />
+            <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
             <NavLink href="/vaccines-client" pathname={pathname} label="Daftar Vaksinasi" />
             <Link
-              href="/logout"
+              href="/api/auth/signout"
               className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
             >
               Logout

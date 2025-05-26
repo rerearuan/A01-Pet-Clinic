@@ -1,94 +1,165 @@
-'use client';  
+'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+interface Treatment {
+  kode_perawatan: string;
+  nama_perawatan: string;
+}
+
+interface Medicine {
+  kode: string;
+  nama: string;
+  stok: number;
+  harga: number;
+}
+
+interface Prescription {
+  kode_perawatan: string;
+  kode_obat: string;
+  kuantitas_obat: number;
+  nama_perawatan: string;
+  nama_obat: string;
+  harga_obat: number;
+  total_harga: number;
+}
 
 const PrescriptionPage = () => {
-  const [treatments] = useState([
-    { code: 'TRM001', name: 'Pemeriksaan Umum' },
-    { code: 'TRM002', name: 'Pembersihan Telinga' },
-    { code: 'TRM003', name: 'Perawatan Bulu dan Kuku' },
-    { code: 'TRM004', name: 'Perawatan Reproduksi' },
-    { code: 'TRM005', name: 'Penanganan Luka Ringan' },
-  ]);
-
-  const [medicines] = useState([
-    { code: 'MED001', name: 'Amoxicillin 250 mg Suspensi', stock: 30, price: 45000 },
-    { code: 'MED002', name: 'Meloxicam 5 mg Tablet', stock: 25, price: 60000 },
-    { code: 'MED003', name: 'Ivermectin 1 % Injeksi', stock: 18, price: 85000 },
-    { code: 'MED004', name: 'Ketoconazole 2 % Shampoo', stock: 22, price: 75000 },
-    { code: 'MED005', name: 'Prednison 5 mg Tablet', stock: 40, price: 35000 },
-    { code: 'MED006', name: 'Doxycycline 50 mg Kapsul', stock: 28, price: 55000 },
-    { code: 'MED007', name: 'Gentamicin 0,3 % Tetes Mata', stock: 35, price: 25000 },
-    { code: 'MED008', name: 'Vaksin Rabies Inaktif', stock: 20, price: 95000 },
-    { code: 'MED009', name: 'Vitamin B-Kompleks Injeksi', stock: 27, price: 30000 },
-    { code: 'MED010', name: 'Fipronil 0,25 % Spray', stock: 24, price: 68000 },
-  ]);
-
-  const [prescriptions, setPrescriptions] = useState([
-    { treatment: 'TRM001 - Pemeriksaan Umum', medicine: 'MED001 - Amoxicillin 250 mg Suspensi', quantity: 8, totalPrice: 360000 },
-    { treatment: 'TRM002 - Pembersihan Telinga', medicine: 'MED002 - Meloxicam 5 mg Tablet', quantity: 7, totalPrice: 420000 },
-    { treatment: 'TRM003 - Perawatan Bulu dan Kuku', medicine: 'MED003 - Ivermectin 1 % Injeksi', quantity: 6, totalPrice: 510000 },
-    { treatment: 'TRM004 - Perawatan Reproduksi', medicine: 'MED004 - Ketoconazole 2 % Shampoo', quantity: 6, totalPrice: 450000 },
-    { treatment: 'TRM005 - Penanganan Luka Ringan', medicine: 'MED005 - Prednison 5 mg Tablet', quantity: 9, totalPrice: 315000 },
-    { treatment: 'TRM001 - Pemeriksaan Umum', medicine: 'MED006 - Doxycycline 50 mg Kapsul', quantity: 10, totalPrice: 550000 },
-    { treatment: 'TRM002 - Pembersihan Telinga', medicine: 'MED007 - Gentamicin 0,3 % Tetes Mata', quantity: 6, totalPrice: 150000 },
-    { treatment: 'TRM003 - Perawatan Bulu dan Kuku', medicine: 'MED008 - Vaksin Rabies Inaktif', quantity: 9, totalPrice: 855000 },
-    { treatment: 'TRM004 - Perawatan Reproduksi', medicine: 'MED009 - Vitamin B-Kompleks Injeksi', quantity: 10, totalPrice: 300000 },
-    { treatment: 'TRM005 - Penanganan Luka Ringan', medicine: 'MED010 - Fipronil 0,25 % Spray', quantity: 7, totalPrice: 476000 },
-  ]);
-
-  const [newPrescription, setNewPrescription] = useState({ treatment: '', medicine: '', quantity: 1 });
-  const [editPrescription, setEditPrescription] = useState<{ treatment: string, medicine: string, quantity: number, totalPrice: number } | null>(null);
+  const [treatments, setTreatments] = useState<Treatment[]>([]);
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const [newPrescription, setNewPrescription] = useState({
+    kode_perawatan: '',
+    kode_obat: '',
+    kuantitas_obat: 1,
+  });
+  const [editPrescription, setEditPrescription] = useState<Prescription | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault();
-    const selectedMedicine = medicines.find(med => med.code === newPrescription.medicine);
-    if (selectedMedicine && newPrescription.quantity <= selectedMedicine.stock) {
-      const totalPrice = selectedMedicine.price * newPrescription.quantity;
-      setPrescriptions([...prescriptions, {
-        treatment: treatments.find(trmt => trmt.code === newPrescription.treatment)?.name || '',
-        medicine: selectedMedicine.name,
-        quantity: newPrescription.quantity,
-        totalPrice
-      }]);
-      setNewPrescription({ treatment: '', medicine: '', quantity: 1 });
-    } else {
-      alert('Invalid quantity or not enough stock');
-    }
-  };
+  // Fetch treatments, medicines, and prescriptions on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Fetch treatments
+        const treatmentsRes = await fetch('/api/treatments'); // Adjust endpoint if different
+        const treatmentsData = await treatmentsRes.json();
+        if (!treatmentsData.success) throw new Error(treatmentsData.message);
+        setTreatments(treatmentsData.data);
 
-  const handleUpdate = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editPrescription) {
-      const selectedMedicine = medicines.find(med => med.code === editPrescription.medicine);
-      if (selectedMedicine && editPrescription.quantity <= selectedMedicine.stock) {
-        const totalPrice = selectedMedicine.price * editPrescription.quantity;
-        setPrescriptions(prescriptions.map(prescription =>
-          prescription.medicine === editPrescription.medicine && prescription.treatment === editPrescription.treatment
-            ? { ...prescription, quantity: editPrescription.quantity, totalPrice }
-            : prescription
-        ));
-        setEditPrescription(null);
-      } else {
-        alert('Invalid quantity or not enough stock');
+        // Fetch medicines
+        const medicinesRes = await fetch('/api/medicines'); // Adjust endpoint if different
+        const medicinesData = await medicinesRes.json();
+        if (!medicinesData.success) throw new Error(medicinesData.message);
+        setMedicines(medicinesData.data);
+
+        // Fetch prescriptions
+        const prescriptionsRes = await fetch('/api/prescriptions');
+        const prescriptionsData = await prescriptionsRes.json();
+        if (!prescriptionsData.success) throw new Error(prescriptionsData.message);
+        setPrescriptions(prescriptionsData.data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch data');
+      } finally {
+        setLoading(false);
       }
+    };
+    fetchData();
+  }, []);
+
+  // Handle create prescription
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('/api/prescriptions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newPrescription),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      setPrescriptions([...prescriptions, data.data]);
+      setNewPrescription({ kode_perawatan: '', kode_obat: '', kuantitas_obat: 1 });
+      alert('Prescription created successfully');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to create prescription');
     }
   };
 
-  const handleDelete = (treatment: string, medicine: string) => {
-    if (confirm('Are you sure you want to delete this prescription?')) {
-      setPrescriptions(prescriptions.filter(prescription =>
-        prescription.treatment !== treatment || prescription.medicine !== medicine
-      ));
+  // Handle update prescription
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editPrescription) return;
+    try {
+      const res = await fetch(
+        `/api/prescriptions/${editPrescription.kode_perawatan}/${editPrescription.kode_obat}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kuantitas_obat: editPrescription.kuantitas_obat }),
+        }
+      );
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      setPrescriptions(
+        prescriptions.map((p) =>
+          p.kode_perawatan === editPrescription.kode_perawatan &&
+          p.kode_obat === editPrescription.kode_obat
+            ? data.data
+            : p
+        )
+      );
+      setEditPrescription(null);
+      alert('Prescription updated successfully');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to update prescription');
     }
   };
 
-  // Filter prescriptions based on the search term
-  const filteredPrescriptions = prescriptions.filter(prescription =>
-    prescription.treatment.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    prescription.medicine.toLowerCase().includes(searchTerm.toLowerCase())
+  // Handle delete prescription
+  const handleDelete = async (kode_perawatan: string, kode_obat: string) => {
+    if (!confirm('Are you sure you want to delete this prescription?')) return;
+    try {
+      const res = await fetch(`/api/prescriptions/${kode_perawatan}/${kode_obat}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      setPrescriptions(
+        prescriptions.filter(
+          (p) => p.kode_perawatan !== kode_perawatan || p.kode_obat !== kode_obat
+        )
+      );
+      alert('Prescription deleted successfully');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete prescription');
+    }
+  };
+
+  // Filter prescriptions based on search term
+  const filteredPrescriptions = prescriptions.filter(
+    (prescription) =>
+      prescription.nama_perawatan.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      prescription.nama_obat.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p className="text-red-500">Error: {error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
@@ -113,20 +184,34 @@ const PrescriptionPage = () => {
         <form onSubmit={handleCreate}>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Jenis Perawatan</label>
-            <select value={newPrescription.treatment} onChange={(e) => setNewPrescription({ ...newPrescription, treatment: e.target.value })} className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500">
-              {treatments.map(treatment => (
-                <option key={treatment.code} value={treatment.code}>
-                  {treatment.code} - {treatment.name}
+            <select
+              value={newPrescription.kode_perawatan}
+              onChange={(e) =>
+                setNewPrescription({ ...newPrescription, kode_perawatan: e.target.value })
+              }
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500"
+            >
+              <option value="">Select Treatment</option>
+              {treatments.map((treatment) => (
+                <option key={treatment.kode_perawatan} value={treatment.kode_perawatan}>
+                  {treatment.kode_perawatan} - {treatment.nama_perawatan}
                 </option>
               ))}
             </select>
           </div>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Obat</label>
-            <select value={newPrescription.medicine} onChange={(e) => setNewPrescription({ ...newPrescription, medicine: e.target.value })} className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500">
-              {medicines.map(medicine => (
-                <option key={medicine.code} value={medicine.code}>
-                  {medicine.code} - {medicine.name} [{medicine.stock}]
+            <select
+              value={newPrescription.kode_obat}
+              onChange={(e) =>
+                setNewPrescription({ ...newPrescription, kode_obat: e.target.value })
+              }
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500"
+            >
+              <option value="">Select Medicine</option>
+              {medicines.map((medicine) => (
+                <option key={medicine.kode} value={medicine.kode}>
+                  {medicine.kode} - {medicine.nama} [Stock: {medicine.stok}]
                 </option>
               ))}
             </select>
@@ -135,14 +220,24 @@ const PrescriptionPage = () => {
             <label className="block text-sm font-medium text-gray-700">Kuantitas Obat</label>
             <input
               type="number"
-              value={newPrescription.quantity}
-              onChange={(e) => setNewPrescription({ ...newPrescription, quantity: parseInt(e.target.value) })}
+              value={newPrescription.kuantitas_obat}
+              onChange={(e) =>
+                setNewPrescription({
+                  ...newPrescription,
+                  kuantitas_obat: parseInt(e.target.value) || 1,
+                })
+              }
               min="1"
-              max={medicines.find(med => med.code === newPrescription.medicine)?.stock || 0}
+              max={medicines.find((med) => med.kode === newPrescription.kode_obat)?.stok || 0}
               className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500"
             />
           </div>
-          <button type="submit" className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition">Create</button>
+          <button
+            type="submit"
+            className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition"
+          >
+            Create
+          </button>
         </form>
       </div>
 
@@ -153,24 +248,44 @@ const PrescriptionPage = () => {
           <form onSubmit={handleUpdate}>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Jenis Perawatan</label>
-              <input type="text" value={editPrescription.treatment} disabled className="w-full p-3 rounded-lg bg-gray-100 border" />
+              <input
+                type="text"
+                value={`${editPrescription.kode_perawatan} - ${editPrescription.nama_perawatan}`}
+                disabled
+                className="w-full p-3 rounded-lg bg-gray-100 border"
+              />
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Obat</label>
-              <input type="text" value={editPrescription.medicine} disabled className="w-full p-3 rounded-lg bg-gray-100 border" />
+              <input
+                type="text"
+                value={`${editPrescription.kode_obat} - ${editPrescription.nama_obat}`}
+                disabled
+                className="w-full p-3 rounded-lg bg-gray-100 border"
+              />
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Kuantitas Obat</label>
               <input
                 type="number"
-                value={editPrescription.quantity}
-                onChange={(e) => setEditPrescription({ ...editPrescription, quantity: parseInt(e.target.value) })}
+                value={editPrescription.kuantitas_obat}
+                onChange={(e) =>
+                  setEditPrescription({
+                    ...editPrescription,
+                    kuantitas_obat: parseInt(e.target.value) || 1,
+                  })
+                }
                 min="1"
-                max={medicines.find(med => med.code === editPrescription.medicine)?.stock || 0}
+                max={medicines.find((med) => med.kode === editPrescription.kode_obat)?.stok || 0}
                 className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500"
               />
             </div>
-            <button type="submit" className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition">Update</button>
+            <button
+              type="submit"
+              className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition"
+            >
+              Update
+            </button>
           </form>
         </div>
       )}
@@ -191,22 +306,28 @@ const PrescriptionPage = () => {
           </thead>
           <tbody>
             {filteredPrescriptions.map((prescription, index) => (
-              <tr key={index}>
+              <tr key={`${prescription.kode_perawatan}-${prescription.kode_obat}`}>
                 <td className="py-3 px-6">{index + 1}</td>
-                <td className="py-3 px-6">{prescription.treatment}</td>
-                <td className="py-3 px-6">{prescription.medicine}</td>
-                <td className="py-3 px-6">{prescription.quantity}</td>
-                <td className="py-3 px-6">Rp{prescription.totalPrice.toLocaleString()}</td>
+                <td className="py-3 px-6">
+                  {prescription.kode_perawatan} - {prescription.nama_perawatan}
+                </td>
+                <td className="py-3 px-6">
+                  {prescription.kode_obat} - {prescription.nama_obat}
+                </td>
+                <td className="py-3 px-6">{prescription.kuantitas_obat}</td>
+                <td className="py-3 px-6">Rp{prescription.total_harga.toLocaleString()}</td>
                 <td className="py-3 px-6 space-x-2">
                   <button
-                    className="bg-black text-white py-1 px-3 rounded-lg hover:bg-gray-800 transition"
+                    className="bg-black text-white py-1 px-3 rounded-lg hover:bg-gray-800Blog transition"
                     onClick={() => setEditPrescription(prescription)}
                   >
                     Update
                   </button>
                   <button
                     className="bg-red-500 text-white py-1 px-3 rounded-lg hover:bg-red-600 transition"
-                    onClick={() => handleDelete(prescription.treatment, prescription.medicine)}
+                    onClick={() =>
+                      handleDelete(prescription.kode_perawatan, prescription.kode_obat)
+                    }
                   >
                     Delete
                   </button>
