@@ -68,7 +68,7 @@ export default function DoctorNavbar() {
                   <DropdownLink href="/medicine" label="Manajemen Obat" />
                   <DropdownLink href="/treatment" label="Manajemen Jenis Perawatan" />
                   <DropdownLink href="/prescription" label="Manajemen Pemberian Obat" />
-                  <DropdownLink href="/doctor/manage/vaccinations" label="Manajemen Vaksinasi Hewan" />
+                  <DropdownLink href="/vaksin" label="Manajemen Vaksinasi Hewan" />
                 </div>
               </div>
             </div>
@@ -101,7 +101,7 @@ export default function DoctorNavbar() {
                   <DropdownLink href="/medicine" label="Manajemen Obat" />
                   <DropdownLink href="/treatment" label="Manajemen Jenis Perawatan" />
                   <DropdownLink href="/prescription" label="Manajemen Pemberian Obat" />
-                  <DropdownLink href="/doctor/manage/vaccinations" label="Manajemen Vaksinasi Hewan" />
+                  <DropdownLink href="/vaksin" label="Manajemen Vaksinasi Hewan" />
               </div>
             </div>
             <Link
