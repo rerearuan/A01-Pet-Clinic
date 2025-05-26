@@ -21,22 +21,19 @@ export default function LoginPage() {
         redirect: false,
         email,
         password,
+        callbackUrl: '/dashboard-user',
       });
-
-      console.log('SignIn result:', result); // Debug: Periksa hasil signIn
 
       if (result?.error) {
         setError(result.error);
-      } else if (!result?.ok) {
-        setError('Login gagal. Silakan coba lagi.');
+      } else if (result?.url) {
+        router.push(result.url);
       } else {
-        console.log('Redirecting to /dashboard'); // Debug: Konfirmasi redirect
-        router.push('/dashboard-user');
-        router.refresh(); // Refresh untuk memastikan sesi terdeteksi
+        setError('Login gagal. Silakan coba lagi.');
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError('Terjadi kesalahan saat login. Coba lagi.');
-      console.error('Login error:', err); // Debug: Tangkap error tak terduga
     } finally {
       setLoading(false);
     }
@@ -57,7 +54,8 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+              className="mt-1 w-full px-3 py-2 border rounded-md shadow-sm text-black placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+              placeholder="your.email@example.com"
               required
               disabled={loading}
             />
@@ -71,7 +69,8 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+              className="mt-1 w-full px-3 py-2 border rounded-md shadow-sm text-black placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+              placeholder="********"
               required
               disabled={loading}
             />

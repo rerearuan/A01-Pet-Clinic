@@ -63,7 +63,7 @@ export default function NurseNavbar() {
                 <div className="py-2">
                   <DropdownLink href="/medicine" label="Manajemen Obat" />
                   <DropdownLink href="/treatment" label="Manajemen Jenis Perawatan" />
-                  <DropdownLink href="" label="Manajemen Vaksin" />
+                  <DropdownLink href="/vaksin-stok" label="Manajemen Vaksin" />
                 </div>
               </div>
             </div>
@@ -92,7 +92,7 @@ export default function NurseNavbar() {
               <div className="flex flex-col pl-4">
                 <DropdownLink href="/medicine" label="Manajemen Obat" />
                 <DropdownLink href="/treatment" label="Manajemen Jenis Perawatan" />
-                <DropdownLink href="" label="Manajemen Vaksin" />
+                <DropdownLink href="/vaksin-stok" label="Manajemen Vaksin" />
               </div>
             </div>
             <Link

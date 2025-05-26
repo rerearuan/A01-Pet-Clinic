@@ -39,12 +39,12 @@ export default function ClientNavbar() {
             </button>
           </div>
 
-
           {/* Main Navigation */}
           <div className="hidden md:flex items-center space-x-8 h-10">
             <NavLink href="/doctor" pathname={pathname} label="Dashboard" />
             <NavLink href="/doctor/pet-types" pathname={pathname} label="Kelola Hewan Peliharaan" />
             <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
+            <NavLink href="/vaccines-client" pathname={pathname} label="Daftar Vaksinasi" />
             </div>
             
             {/* Logout Button */}
@@ -65,6 +65,7 @@ export default function ClientNavbar() {
             <NavLink href="/doctor" pathname={pathname} label="Dashboard" />
             <NavLink href="/doctor/pet-types" pathname={pathname} label="Kelola Hewan Peliharaan" />
             <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
+            <NavLink href="/vaccines-client" pathname={pathname} label="Daftar Vaksinasi" />
             <Link
               href="/api/auth/signout"
               className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
