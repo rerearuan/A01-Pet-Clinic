@@ -19,8 +19,7 @@ export async function GET(req: NextRequest) {
         no_front_desk AS "frontDeskId",
         no_perawat_hewan AS "nurseId",
         no_dokter_hewan AS "doctorId",
-        kode_perawatan AS "treatmentCode",
-        catatan AS "treatmentNotes"
+        kode_perawatan AS "treatmentCode"
       FROM kunjungan_keperawatan
     `);
 
@@ -47,8 +46,7 @@ export async function POST(req: NextRequest) {
       no_front_desk,
       no_perawat_hewan,
       no_dokter_hewan,
-      kode_perawatan,
-      catatan
+      kode_perawatan
     } = body;
     console.log('Request body:', body);
     
@@ -58,8 +56,8 @@ export async function POST(req: NextRequest) {
     
     const insertQuery = `
       INSERT INTO kunjungan_keperawatan 
-      (id_kunjungan, nama_hewan, no_identitas_klien, no_front_desk, no_perawat_hewan, no_dokter_hewan, kode_perawatan, catatan)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      (id_kunjungan, nama_hewan, no_identitas_klien, no_front_desk, no_perawat_hewan, no_dokter_hewan, kode_perawatan)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING id_kunjungan AS "visitId"
     `;
     
@@ -70,8 +68,7 @@ export async function POST(req: NextRequest) {
       no_front_desk || null,
       no_perawat_hewan || null,
       no_dokter_hewan || null,
-      kode_perawatan,
-      catatan || null
+      kode_perawatan
     ];
     
     const insertResult = await pool.query(insertQuery, insertValues);

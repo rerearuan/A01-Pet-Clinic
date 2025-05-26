@@ -41,6 +41,7 @@ interface Email{
 
 export interface Visit {
   visitId: string;
+  animalname : string;
   clientid: string;
   frontdeskid: string;
   doctorid: string;
@@ -231,8 +232,7 @@ const id_user = getIdByEmail(session?.user.email||'');
         no_front_desk: formData.frontDeskId,
         no_perawat_hewan: formData.nurseId,
         no_dokter_hewan: formData.doctorId,
-        kode_perawatan: formData.treatmentCode,
-        catatan: notesValue,
+        kode_perawatan: formData.treatmentCode
       };
   
       console.log('Sending POST request with:', requestBody);
@@ -294,7 +294,6 @@ const id_user = getIdByEmail(session?.user.email||'');
         no_dokter_hewan: formData.doctorId,
         kode_perawatan_baru: formData.treatmentCode,  // kode baru
         kode_perawatan_lama: currentTreatment.treatmentCode, // kode lama, dari data sebelumnya
-        catatan: notesValue,
       }),
       });
   
@@ -388,6 +387,13 @@ const id_user = getIdByEmail(session?.user.email||'');
   const filteredVisits = availableVisits.filter(visit => visit.doctorid === id_user);
   console.log('filter', filteredVisits)
   // Create/Update Modal Component
+
+  function formatEmailName(email: string) {
+    if (!email) return "";
+    const name = email.split("@")[0];
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  }
+
   const TreatmentFormModal = ({ isUpdate = false }: { isUpdate?: boolean }) => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
@@ -409,12 +415,18 @@ const id_user = getIdByEmail(session?.user.email||'');
               >
                 <option value="">Pilih Kunjungan</option>
                 {availableVisits
-                .filter((visit) => visit.doctorid=== id_user)
-                .map((visit) => (
-                  <option key={visit.visitId} value={visit.visitId}>
-                    {visit.visitId}
-                  </option>
-                ))}
+                  .filter((visit) => visit.doctorid === id_user)
+                  .map((visit) => {
+                    const frontDeskEmail = staffMembers.find(staff => staff.id === visit.frontdeskid)?.email_user || visit.frontdeskid;
+                    const doctorEmail = staffMembers.find(staff => staff.id === visit.doctorid)?.email_user || visit.doctorid;
+                    const nurseEmail = staffMembers.find(staff => staff.id === visit.nurseid)?.email_user || visit.nurseid;
+
+                    return (
+                      <option key={visit.visitId} value={visit.visitId}>
+                        {`ID Kunjungan: ${visit.visitId} | Nama Hewan: ${visit.animalname} | ID Klien: ${visit.clientid} | Front Desk: ${frontDeskEmail} | Dokter: ${doctorEmail} | Perawat: ${nurseEmail}`}
+                      </option>
+                    );
+                  })}
               </select>
             </div>
 
@@ -434,18 +446,6 @@ const id_user = getIdByEmail(session?.user.email||'');
                     </option>
                 ))}
               </select>
-            </div>
-
-            <div>
-              <h3 className="font-medium mb-2">Catatan</h3>
-              <textarea
-                name="treatmentNotes"
-                value={notesValue}
-                onChange={handleNotesChange}
-                ref={notesTextareaRef}
-                className="w-full border border-gray-300 rounded-md p-2 min-h-[100px]"
-                required
-              />
             </div>
 
             <div className="flex justify-center space-x-4 pt-4">
@@ -565,9 +565,6 @@ const id_user = getIdByEmail(session?.user.email||'');
                   Kode Treatment
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Catatan
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Action
                 </th>
               </tr>
@@ -594,18 +591,17 @@ const id_user = getIdByEmail(session?.user.email||'');
                   <td className="px-4 py-3 text-sm">{treatment.animalName}</td>
                   <td className="px-4 py-3 text-sm">{treatment.clientId}</td>
                   <td className="px-4 py-3 text-sm">
-                    {staffMembers.find(staff => staff.id === treatment.frontDeskId)?.email_user || treatment.frontDeskId}
+                      {formatEmailName(staffMembers.find(staff => staff.id === treatment.frontDeskId)?.email_user|| treatment.frontDeskId)}
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    {staffMembers.find(staff => staff.id === treatment.nurseId)?.email_user || treatment.nurseId}
+                    {formatEmailName(staffMembers.find(staff => staff.id === treatment.nurseId)?.email_user || treatment.nurseId)}
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    dr. {staffMembers.find(staff => staff.id === treatment.doctorId)?.email_user || treatment.doctorId}
+                    dr. {formatEmailName(staffMembers.find(staff => staff.id === treatment.doctorId)?.email_user || treatment.doctorId)}
                   </td>
                   <td className="px-4 py-3 text-sm">
                     {availableTreatments.find(t => t.code === treatment.treatmentCode)?.name || treatment.treatmentCode}
                   </td>
-                  <td className="px-4 py-3 text-sm">{treatment.treatmentNotes}</td>
                   <td className="px-4 py-3 text-sm space-x-2">
                     {userRole==='dokter-hewan' && <div className="flex flex-col w-24">
                       <button

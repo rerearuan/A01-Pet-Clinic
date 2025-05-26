@@ -4,7 +4,6 @@ import { useSession } from "next-auth/react";
 import { useState, useEffect } from 'react';
 import { FaPlus, FaFileMedical, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
 import RekamMedisModal from './components/RekamMedisModal';
-// import { getSession } from '@/lib/auth-utils';
 import { ErrorDisplay } from "./components/ErrorDisplay";
 
 type VisitType = 'Walk-In' | 'Janji Temu' | 'Darurat';
@@ -179,7 +178,7 @@ export default function VisitPage() {
     if (!clientId) return [];
     
     return state.hewanList
-      // .filter((hewan: Hewan) => hewan.no_identitas_klien === clientId)
+      .filter((hewan: Hewan) => hewan.no_identitas_klien === clientId)
       .map((hewan: Hewan) => ({
         value: hewan.nama,
         label: hewan.nama
@@ -277,61 +276,59 @@ export default function VisitPage() {
 };
 
   const handleUpdate = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!currentVisit.kunjungan) return;
-  
-  try {
-    // Format payload dengan DateTime yang benar
-    const payload = {
-      id: currentVisit.kunjungan.id,
-      clientId: form.clientId,
-      petName: form.petName,
-      visitType: form.visitType,
-      startTime: new Date(form.startTime).toISOString(),
-      endTime: form.endTime ? new Date(form.endTime).toISOString() : null,
-      frontDeskId: form.frontDeskId,
-      nurseId: form.nurseId,
-      doctorId: form.doctorId
-    };
-
-    const response = await fetch('/api/visits/get-or-post-visit', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
+    e.preventDefault();
+    if (!currentVisit.kunjungan) return;
     
-    // Update state dengan data terbaru
-    if(data.success){
-    const updatedVisits = state.visits.map(v => 
-      v.id === currentVisit.kunjungan?.id ? { 
-        ...v,
-        ...form,
-        startTime: data.data.startTime || data.data.timestamp_awal,
-        endTime: data.data.endTime || data.data.timestamp_akhir
-      } : v
-    );
-    
-    setState(prev => ({ ...prev, visits: updatedVisits }));
-    closeModal('update');
-    resetForm();
-    setError(null);
-  } else {
-      setError(data.message || 'Terjadi kesalahan');
-  }
-    } catch (error) {
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : 'Terjadi kesalahan saat memproses permintaan';
+    try {
+      // Format payload dengan DateTime yang benar
+      const payload = {
+        id: currentVisit.kunjungan.id,
+        clientId: form.clientId,
+        petName: form.petName,
+        visitType: form.visitType,
+        startTime: new Date(form.startTime).toISOString(),
+        endTime: form.endTime ? new Date(form.endTime).toISOString() : null,
+        frontDeskId: form.frontDeskId,
+        nurseId: form.nurseId,
+        doctorId: form.doctorId
+      };
+
+      const response = await fetch('/api/visits/get-or-post-visit', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
       
-      setState(prev => ({ ...prev, error: errorMessage }));
+      // Update state dengan data terbaru
+      if(data.success){
+      const updatedVisits = state.visits.map(v => 
+        v.id === currentVisit.kunjungan?.id ? { 
+          ...v,
+          ...form,
+          startTime: data.data.startTime || data.data.timestamp_awal,
+          endTime: data.data.endTime || data.data.timestamp_akhir
+        } : v
+      );
+      
+      setState(prev => ({ ...prev, visits: updatedVisits }));
+      closeModal('update');
+      resetForm();
+      setError(null);
+    } else {
+        console.log("error:", data.message)
+        setError(data.message);
+
     }
-  };
+      } catch (error) {
+        const errorMessage = error instanceof Error 
+          ? error.message 
+          : 'Terjadi kesalahan saat memproses permintaan';
+        
+        setState(prev => ({ ...prev, error: errorMessage }));
+      }
+    };
 
   const handleDelete = async () => {
   if (!currentVisit.idToDelete) return;
@@ -533,7 +530,7 @@ const formatDateTimeForInput = (dateString: string) => {
           </button>
         </div>
 
-         {error && (
+         {error &&  (
             <ErrorDisplay
               error={error}
               onClose={() => setError(null)}

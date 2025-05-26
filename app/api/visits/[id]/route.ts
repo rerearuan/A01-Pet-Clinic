@@ -32,17 +32,16 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
 
       const query = `
         SELECT 
-          kp.catatan, 
+          k.catatan, 
           k.suhu AS "bodyTemperature", 
           k.berat_badan AS "bodyWeight"
-        FROM KUNJUNGAN_KEPERAWATAN kp
-        JOIN KUNJUNGAN k ON kp.id_kunjungan = k.id_kunjungan
-        WHERE kp.id_kunjungan = $1
-          AND kp.nama_hewan = $2
-          AND kp.no_identitas_klien = $3
-          AND kp.no_front_desk = $4
-          AND kp.no_perawat_hewan = $5
-          AND kp.no_dokter_hewan = $6
+        FROM KUNJUNGAN k
+        WHERE k.id_kunjungan = $1
+          AND k.nama_hewan = $2
+          AND k.no_identitas_klien = $3
+          AND k.no_front_desk = $4
+          AND k.no_perawat_hewan = $5
+          AND k.no_dokter_hewan = $6
       `;
 
       const result = await pool.query(query, [
@@ -64,7 +63,7 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
       return NextResponse.json({
         success: true,
         data: {
-          bodyTemperature: parseFloat(result.rows[0].bodyTemperature),
+          bodyTemperature: parseInt(result.rows[0].bodyTemperature),
           bodyWeight: parseFloat(result.rows[0].bodyWeight),
           catatan: result.rows[0].catatan
         }
