@@ -23,17 +23,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
       const query = `
         SELECT 
-          kp.catatan, 
+          k.catatan, 
           k.body_temperature AS "bodyTemperature", 
           k.body_weight AS "bodyWeight"
-        FROM KUNJUNGAN_KEPERAWATAN kp
-        JOIN KUNJUNGAN k ON kp.id_kunjungan = k.id_kunjungan
-        WHERE kp.id_kunjungan = $1
-          AND kp.nama_hewan = $2
-          AND kp.no_identitas_klien = $3
-          AND kp.no_front_desk = $4
-          AND kp.no_perawat_hewan = $5
-          AND kp.no_dokter_hewan = $6
+        FROM KUNJUNGAN k
+        WHERE k.id_kunjungan = $1
+          AND k.nama_hewan = $2
+          AND k.no_identitas_klien = $3
+          AND k.no_front_desk = $4
+          AND k.no_perawat_hewan = $5
+          AND k.no_dokter_hewan = $6
       `;
 
       const result = await pool.query(query, [id, nama_hewan, no_identitas_klien]);

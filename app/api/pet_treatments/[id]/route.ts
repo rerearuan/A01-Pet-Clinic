@@ -23,16 +23,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       no_perawat_hewan,
       no_dokter_hewan,
       kode_perawatan_baru,
-      kode_perawatan_lama,
-      catatan,
+      kode_perawatan_lama
     } = body;
 
     const updateQuery = `
       UPDATE kunjungan_keperawatan
       SET 
-        kode_perawatan = $6,
-        catatan = $8
-      WHERE id_kunjungan = $9 AND nama_hewan = $1 AND no_identitas_klien = $2 AND no_front_desk = $3 AND no_perawat_hewan = $4 AND
+        kode_perawatan = $6
+      WHERE id_kunjungan = $8 AND nama_hewan = $1 AND no_identitas_klien = $2 AND no_front_desk = $3 AND no_perawat_hewan = $4 AND
         no_dokter_hewan = $5 AND kode_perawatan = $7
       RETURNING 
         id_kunjungan AS "visitId",
@@ -41,8 +39,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         no_front_desk AS "frontDeskId",
         no_perawat_hewan AS "nurseId",
         no_dokter_hewan AS "doctorId",
-        kode_perawatan AS "treatmentCode",
-        catatan AS "treatmentNotes"
+        kode_perawatan AS "treatmentCode"
     `;
 
     const values = [
@@ -53,7 +50,6 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       no_dokter_hewan,
       kode_perawatan_baru,
       kode_perawatan_lama,
-      catatan,
       id,
     ];
 

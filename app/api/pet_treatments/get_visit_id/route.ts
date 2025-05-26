@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const result = await pool.query(`
-      SELECT id_kunjungan AS "visitId", no_identitas_klien AS clientId, no_front_desk AS frontDeskId, no_dokter_hewan AS doctorId, no_perawat_hewan AS nurseID
+      SELECT id_kunjungan AS "visitId", nama_hewan AS animalName, no_identitas_klien AS clientId, no_front_desk AS frontDeskId, no_dokter_hewan AS doctorId, no_perawat_hewan AS nurseID
       FROM kunjungan
     `);
 

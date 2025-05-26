@@ -101,15 +101,15 @@ export async function PUT(request: Request) {
         endTime: result.rows[0].timestamp_akhir
       }
     });
-  } catch (error: unknown) {
+  } catch (error: any ) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.log('error', error)
+    console.error('PUT /api/visits error:', error);
     return NextResponse.json(
       { 
         success: false,
         message: errorMessage,
       },
-      { status: 400 }
+      { status: 400}
     );
   }
 }
