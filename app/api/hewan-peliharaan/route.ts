@@ -16,6 +16,11 @@ export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const role = session.user.role;
+  if (role !== 'front-desk' && role !== 'individu' && role !== 'perusahaan') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const { nama, no_identitas_klien, id_jenis, tanggal_lahir, url_foto } = await req.json();
   await pool.query(
     `INSERT INTO hewan (nama, no_identitas_klien, id_jenis, tanggal_lahir, url_foto)

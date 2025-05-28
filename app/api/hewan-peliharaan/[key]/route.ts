@@ -19,6 +19,11 @@ export async function PUT(req: NextRequest, { params }: { params: { key: string 
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const role = session.user.role;
+  if (role !== 'front-desk' && role !== 'individu' && role !== 'perusahaan') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const { nama, no_identitas_klien } = parseKey(params.key);
   const { id_jenis, tanggal_lahir, url_foto } = await req.json();
   await pool.query(
@@ -31,6 +36,11 @@ export async function PUT(req: NextRequest, { params }: { params: { key: string 
 export async function DELETE(_: NextRequest, { params }: { params: { key: string } }) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const role = session.user.role;
+  if (role !== 'front-desk') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   const { nama, no_identitas_klien } = parseKey(params.key);
   await pool.query('DELETE FROM hewan WHERE nama = $1 AND no_identitas_klien = $2', [nama, no_identitas_klien]);
