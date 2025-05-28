@@ -42,7 +42,7 @@ export default function ClientNavbar() {
           {/* Main Navigation */}
           <div className="hidden md:flex items-center space-x-8 h-10">
             <NavLink href="/doctor" pathname={pathname} label="Dashboard" />
-            <NavLink href="/doctor/pet-types" pathname={pathname} label="Kelola Hewan Peliharaan" />
+            <NavLink href="/jenis-hewan" pathname={pathname} label="Kelola Hewan Peliharaan" />
             <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
             <NavLink href="/vaccines-client" pathname={pathname} label="Daftar Vaksinasi" />
             </div>
@@ -63,7 +63,7 @@ export default function ClientNavbar() {
         {isMobileMenuOpen && (
           <div className="md:hidden flex flex-col space-y-4 mt-4">
             <NavLink href="/doctor" pathname={pathname} label="Dashboard" />
-            <NavLink href="/doctor/pet-types" pathname={pathname} label="Kelola Hewan Peliharaan" />
+            <NavLink href="/jenis-hewan" pathname={pathname} label="Kelola Hewan Peliharaan" />
             <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
             <NavLink href="/vaccines-client" pathname={pathname} label="Daftar Vaksinasi" />
             <Link

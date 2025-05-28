@@ -126,7 +126,7 @@ export default function FrontDeskDashboard({ userData, onUpdatePassword, onUpdat
     <div className="space-y-6 p-6">
       {/* Profile Card */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="px-6 py-4 bg-green-700 text-white">
+        <div className="px-6 py-4 bg-orange-500 text-white">
           <h2 className="text-xl font-semibold">Profile Front-Desk Officer</h2>
         </div>
         <div className="p-6">
@@ -192,7 +192,7 @@ export default function FrontDeskDashboard({ userData, onUpdatePassword, onUpdat
 
       {/* Today's Appointments */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="px-6 py-4 bg-green-700 text-white flex justify-between items-center">
+        <div className="px-6 py-4 bg-orange-500 text-white flex justify-between items-center">
           <h2 className="text-xl font-semibold">Kunjungan Hari Ini</h2>
           <Link href="/appointments/manage" className="bg-white text-green-700 px-3 py-1 rounded-md text-sm font-medium">
             Kelola Semua
@@ -287,7 +287,7 @@ export default function FrontDeskDashboard({ userData, onUpdatePassword, onUpdat
 
       {/* Recent Clients */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="px-6 py-4 bg-green-700 text-white flex justify-between items-center">
+        <div className="px-6 py-4 bg-orange-500 text-white flex justify-between items-center">
           <h2 className="text-xl font-semibold">Klien Terbaru</h2>
           <Link href="/clients" className="bg-white text-green-700 px-3 py-1 rounded-md text-sm font-medium">
             Lihat Semua
