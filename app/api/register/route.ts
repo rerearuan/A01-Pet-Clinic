@@ -58,13 +58,12 @@ export async function POST(req: Request) {
         }, { status: 400 });
       }
 
-      const hashedPassword = await bcrypt.hash(password, 10);
       await pool.query('BEGIN');
 
       // Insert ke USER
       await pool.query(
         'INSERT INTO "USER" (email, password, alamat, nomor_telepon) VALUES ($1, $2, $3, $4)',
-        [email, hashedPassword, alamat, nomor_telepon]
+        [email, password, alamat, nomor_telepon]
       );
 
       if (['front-desk', 'dokter-hewan', 'perawat-hewan'].includes(role)) {
