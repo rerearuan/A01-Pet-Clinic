@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
+import { useSession } from 'next-auth/react';
 
 export async function GET() {
   const res = await pool.query(`
@@ -13,11 +12,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const role = session.user.role;
-  if (role !== 'front-desk' && role !== 'individu' && role !== 'perusahaan') {
+  const { data: session } = useSession();
+  if (!session || !session.user || (session.user.role !== 'front-desk' && session.user.role !== 'individu' && session.user.role !== 'perusahaan')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

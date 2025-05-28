@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
+import { useSession } from 'next-auth/react';
 
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
-  const role = session?.user?.role;
-
-  if (role !== 'front-desk') {
+  const { data: session } = useSession();
+  if (!session || !session.user || (session.user.role !== 'front-desk' && session.user.role !== 'dokter-hewan')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -17,10 +14,8 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
 }
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
-  const role = session?.user?.role;
-
-  if (role !== 'front-desk') {
+  const { data: session } = useSession();
+  if (!session || !session.user || (session.user.role !== 'front-desk')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -30,10 +25,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
-  const role = session?.user?.role;
-
-  if (role !== 'front-desk') {
+  const { data: session } = useSession();
+  if (!session || !session.user || (session.user.role !== 'front-desk')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

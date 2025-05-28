@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
+import { useSession } from 'next-auth/react';
 
 function parseKey(key: string) {
   const [nama, no_identitas_klien] = key.split('_');
@@ -16,11 +15,8 @@ export async function GET(_: NextRequest, { params }: { params: { key: string } 
 }
 
 export async function PUT(req: NextRequest, { params }: { params: { key: string } }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const role = session.user.role;
-  if (role !== 'front-desk' && role !== 'individu' && role !== 'perusahaan') {
+  const { data: session } = useSession();
+  if (!session || !session.user || (session.user.role !== 'front-desk' && session.user.role !== 'individu' && session.user.role !== 'perusahaan')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -34,11 +30,8 @@ export async function PUT(req: NextRequest, { params }: { params: { key: string 
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: { key: string } }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const role = session.user.role;
-  if (role !== 'front-desk') {
+  const { data: session } = useSession();
+  if (!session || !session.user || (session.user.role !== 'front-desk')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
