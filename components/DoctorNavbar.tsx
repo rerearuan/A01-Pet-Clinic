@@ -41,7 +41,7 @@ export default function DoctorNavbar() {
 
           {/* Main Navigation */}
           <div className="hidden md:flex items-center space-x-8 h-10">
-            <NavLink href="/dashboards/DokterHewanDashboard" pathname={pathname} label="Dashboard" />
+            <NavLink href="/dashboard-user" pathname={pathname} label="Dashboard" />
             <NavLink href="/jenis-hewan" pathname={pathname} label="Jenis Hewan" />
             <NavLink href="/doctor/pet_treatments" pathname={pathname} label="Perawatan Hewan" />
             <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
@@ -88,7 +88,7 @@ export default function DoctorNavbar() {
 
       {isMobileMenuOpen && (
           <div className="md:hidden flex flex-col space-y-4 mt-4">
-            <NavLink href="/dashboards/DokterHewanDashboard" pathname={pathname} label="Dashboard" />
+            <NavLink href="/dashboard-user" pathname={pathname} label="Dashboard" />
             <NavLink href="/jenis-hewan" pathname={pathname} label="Jenis Hewan" />
             <NavLink href="/doctor/pet_treatments" pathname={pathname} label="Perawatan Hewan" />
             <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
