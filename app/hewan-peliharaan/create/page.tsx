@@ -4,8 +4,12 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Select from 'react-select';
+import { useSession } from 'next-auth/react';
 
 export default function CreatePet() {
+  const { data: session, status } = useSession();
+  const role = session?.user?.role;
+
   const [pemilik, setPemilik] = useState('');
   const [jenis, setJenis] = useState('');
   const [nama, setNama] = useState('');
@@ -16,35 +20,49 @@ export default function CreatePet() {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchOptions = async () => {
-      try {
-        const [resKlien, resJenis] = await Promise.all([
-          fetch('/api/client'),
-          fetch('/api/jenis-hewan'),
-        ]);
+    if (status === 'authenticated') {
+      const fetchOptions = async () => {
+        try {
+          const [resKlien, resJenis] = await Promise.all([
+            fetch('/api/client'),
+            fetch('/api/jenis-hewan'),
+          ]);
 
-        if (resKlien.ok) {
-          const klienData = await resKlien.json();
-          setOwners(klienData.map((k: any) => ({
-            id: k.no_identitas,
-            label: `${k.nama} (${k.no_identitas.slice(0, 8)}...)`
-          })));
+          if (resKlien.ok) {
+            const klienData = await resKlien.json();
+            setOwners(klienData.map((k: any) => ({
+              id: k.no_identitas,
+              label: `${k.nama} (${k.no_identitas.slice(0, 8)}...)`
+            })));
+          }
+
+          if (resJenis.ok) {
+            const jenisData = await resJenis.json();
+            setJenisList(jenisData.map((j: any) => ({
+              id: j.id,
+              label: j.nama_jenis
+            })));
+          }
+        } catch (err) {
+          console.error('Error fetching dropdown options:', err);
         }
+      };
 
-        if (resJenis.ok) {
-          const jenisData = await resJenis.json();
-          setJenisList(jenisData.map((j: any) => ({
-            id: j.id,
-            label: j.nama_jenis
-          })));
-        }
-      } catch (err) {
-        console.error('Error fetching dropdown options:', err);
-      }
-    };
+      fetchOptions();
+    }
+  }, [status]);
 
-    fetchOptions();
-  }, []);
+  if (status === 'loading') {
+    return <div className="min-h-screen flex items-center justify-center">Loading…</div>;
+  }
+
+  if (role !== 'front-desk' && role !== 'individu' && role !== 'perusahaan') {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500 font-semibold">
+        Forbidden: You do not have access to create a pet.
+      </div>
+    );
+  }
 
   const handleCreate = async () => {
     try {

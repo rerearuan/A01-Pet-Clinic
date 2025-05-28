@@ -4,8 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Select from 'react-select';
+import { useSession } from 'next-auth/react';
 
 export default function UpdatePet() {
+  const { data: session, status } = useSession();
+  const role = session?.user?.role;
+
   const { key } = useParams();
   const [owners, setOwners] = useState<{ id: string; label: string }[]>([]);
   const [jenisList, setJenisList] = useState<{ id: string; label: string }[]>([]);
@@ -19,48 +23,64 @@ export default function UpdatePet() {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [resPet, resJenis, resKlien] = await Promise.all([
-          fetch(`/api/hewan-peliharaan/${key}`),
-          fetch('/api/jenis-hewan'),
-          fetch('/api/client'),
-        ]);
+    if (status === 'authenticated' && key) {
+      const fetchData = async () => {
+        try {
+          const [resPet, resJenis, resKlien] = await Promise.all([
+            fetch(`/api/hewan-peliharaan/${key}`),
+            fetch('/api/jenis-hewan'),
+            fetch('/api/client'),
+          ]);
 
-        if (resJenis.ok) {
-          const jenisData = await resJenis.json();
-          setJenisList(jenisData.map((j: any) => ({
-            id: j.id,
-            label: j.nama_jenis
-          })));
+          if (resJenis.ok) {
+            const jenisData = await resJenis.json();
+            setJenisList(jenisData.map((j: any) => ({
+              id: j.id,
+              label: j.nama_jenis
+            })));
+          }
+
+          if (resKlien.ok) {
+            const klienData = await resKlien.json();
+            setOwners(klienData.map((k: any) => ({
+              id: k.no_identitas,
+              label: `${k.nama} (${k.no_identitas.slice(0, 8)}...)`
+            })));
+          }
+
+          if (resPet.ok) {
+            const data = await resPet.json();
+            setPet({
+              pemilik: data.no_identitas_klien,
+              jenis: data.id_jenis,
+              nama: data.nama,
+              tanggal_lahir: data.tanggal_lahir,
+              url_foto: data.url_foto,
+            });
+          }
+        } catch (err) {
+          console.error('Fetch error:', err);
         }
+      };
+      fetchData();
+    }
+  }, [status, key]);
 
-        if (resKlien.ok) {
-          const klienData = await resKlien.json();
-          setOwners(klienData.map((k: any) => ({
-            id: k.no_identitas,
-            label: `${k.nama} (${k.no_identitas.slice(0, 8)}...)`
-          })));
-        }
+  if (status === 'loading' || !pet) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading…
+      </div>
+    );
+  }
 
-        if (resPet.ok) {
-          const data = await resPet.json();
-          setPet({
-            pemilik: data.no_identitas_klien,
-            jenis: data.id_jenis,
-            nama: data.nama,
-            tanggal_lahir: data.tanggal_lahir,
-            url_foto: data.url_foto,
-          });
-        }
-      } catch (err) {
-        console.error('Fetch error:', err);
-      }
-    };
-
-
-    if (key) fetchData();
-  }, [key]);
+  if (role !== 'front-desk' && role !== 'individu' && role !== 'perusahaan') {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500 font-semibold">
+        Forbidden: You do not have access to edit this pet.
+      </div>
+    );
+  }
 
   const handleUpdate = async () => {
     try {
@@ -75,14 +95,6 @@ export default function UpdatePet() {
     }
   };
 
-  if (!pet) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading…
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-8">
       <div className="max-w-md mx-auto bg-white rounded-2xl shadow p-8">
@@ -93,15 +105,15 @@ export default function UpdatePet() {
           </Link>
         </div>
         <div className="space-y-4">
-            <div>
-              <label className="block text-gray-700 font-semibold mb-1">Pemilik</label>
-              <input
-                type="text"
-                value={owners.find(o => o.id === pet.pemilik)?.label || pet.pemilik}
-                disabled
-                className="w-full border border-gray-200 bg-gray-100 rounded-lg px-4 py-2"
-              />
-            </div>
+          <div>
+            <label className="block text-gray-700 font-semibold mb-1">Pemilik</label>
+            <input
+              type="text"
+              value={owners.find(o => o.id === pet.pemilik)?.label || pet.pemilik}
+              disabled
+              className="w-full border border-gray-200 bg-gray-100 rounded-lg px-4 py-2"
+            />
+          </div>
           <div>
             <label className="block text-gray-700 font-semibold mb-1">Jenis Hewan</label>
             <Select
