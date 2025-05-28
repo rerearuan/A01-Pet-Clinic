@@ -163,7 +163,7 @@ const PrescriptionPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
-      <nav className="bg-black text-white p-5">
+      <nav className="bg-orange-500 text-white p-5">
         <h1 className="text-center text-xl font-semibold">Pet Clinic - Prescription Management</h1>
       </nav>
 
@@ -180,7 +180,7 @@ const PrescriptionPage = () => {
 
       {/* Create New Prescription Form */}
       <div className="max-w-4xl mx-auto bg-white p-6 shadow-lg rounded-xl mt-8">
-        <h2 className="text-2xl font-bold mb-6">Create New Prescription</h2>
+        <h2 className="text-2xl font-bold mb-6 text-orange-500">Create New Prescription</h2>
         <form onSubmit={handleCreate}>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Jenis Perawatan</label>
@@ -234,7 +234,7 @@ const PrescriptionPage = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition"
+            className="w-full bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-300 transition"
           >
             Create
           </button>
