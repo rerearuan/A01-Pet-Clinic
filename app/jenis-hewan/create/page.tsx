@@ -7,9 +7,20 @@ export default function CreateJenis() {
   const [nama, setNama] = useState('');
   const router = useRouter();
 
-  const handleCreate = () => {
-    // TODO: POST api
-    router.push('/jenis-hewan');
+  const handleCreate = async () => {
+    try {
+      const res = await fetch('/api/jenis-hewan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nama }),
+      });
+
+      if (!res.ok) throw new Error('Failed to create');
+
+      router.push('/jenis-hewan');
+    } catch (err) {
+      console.error('Error creating jenis:', err);
+    }
   };
 
   return (

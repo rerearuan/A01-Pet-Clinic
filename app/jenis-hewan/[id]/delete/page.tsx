@@ -8,13 +8,23 @@ export default function DeleteJenis() {
   const router = useRouter();
 
   useEffect(() => {
-    // Fetch item name based on ID (dummy)
-    setNama('Kucing');
+    const fetchJenis = async () => {
+      const res = await fetch(`/api/jenis-hewan/${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setNama(data.nama_jenis);
+      }
+    };
+    if (id) fetchJenis();
   }, [id]);
 
-  const handleDelete = () => {
-    // TODO: DELETE API call
-    router.push('/jenis-hewan');
+  const handleDelete = async () => {
+    try {
+      await fetch(`/api/jenis-hewan/${id}`, { method: 'DELETE' });
+      router.push('/jenis-hewan');
+    } catch (err) {
+      console.error('Delete error:', err);
+    }
   };
 
   return (

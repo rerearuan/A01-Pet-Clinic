@@ -10,13 +10,27 @@ export default function UpdateJenis() {
   const router = useRouter();
 
   useEffect(() => {
-    // Fetch existing data (dummy)
-    setNama('Kucing');
+    const fetchJenis = async () => {
+      const res = await fetch(`/api/jenis-hewan/${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setNama(data.nama_jenis);
+      }
+    };
+    if (id) fetchJenis();
   }, [id]);
 
-  const handleUpdate = () => {
-    // TODO: PUT API call to update jenis
-    router.push('/jenis-hewan');
+  const handleUpdate = async () => {
+    try {
+      await fetch(`/api/jenis-hewan/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nama }),
+      });
+      router.push('/jenis-hewan');
+    } catch (err) {
+      console.error('Update error:', err);
+    }
   };
 
   return (

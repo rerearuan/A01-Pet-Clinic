@@ -4,19 +4,20 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { PlusIcon, EditIcon, TrashIcon } from '../../components/Icons';
 
-type Jenis = { id: string; nama: string };
+type Jenis = { id: string; nama_jenis: string };
 
 export default function ListJenis() {
   const [items, setItems] = useState<Jenis[]>([]);
 
   useEffect(() => {
-    setItems([
-      { id: 'HWN001', nama: 'Kucing' },
-      { id: 'HWN002', nama: 'Anjing' },
-      { id: 'HWN003', nama: 'Hamster' },
-      { id: 'HWN004', nama: 'Burung' },
-      { id: 'HWN005', nama: 'Ikan' },
-    ]);
+    const fetchItems = async () => {
+      const res = await fetch('/api/jenis-hewan');
+      if (res.ok) {
+        const data = await res.json();
+        setItems(data);
+      }
+    };
+    fetchItems();
   }, []);
 
   return (
@@ -42,7 +43,7 @@ export default function ListJenis() {
             <div key={it.id} className="grid grid-cols-4 items-center border-t border-gray-200 hover:bg-gray-50">
               <div className="py-3 text-center">{idx + 1}</div>
               <div className="py-3 text-center font-mono text-gray-700">{it.id}</div>
-              <div className="py-3 text-center text-gray-800">{it.nama}</div>
+              <div className="py-3 text-center text-gray-800">{it.nama_jenis}</div>
               <div className="py-3 flex justify-center space-x-3">
                 <Link href={`/jenis-hewan/${it.id}/edit`}>  
                   <button className="bg-blue-100 hover:bg-blue-200 text-blue-600 p-2 rounded-full">
