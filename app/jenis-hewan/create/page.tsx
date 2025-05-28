@@ -2,10 +2,25 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 export default function CreateJenis() {
+  const { data: session, status } = useSession();
+  const role = session?.user?.role;
   const [nama, setNama] = useState('');
   const router = useRouter();
+
+  if (status === 'loading') {
+    return <div className="min-h-screen flex items-center justify-center">Loading…</div>;
+  }
+
+  if (role !== 'front-desk') {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500 font-semibold">
+        Forbidden: You do not have access to create a type.
+      </div>
+    );
+  }
 
   const handleCreate = async () => {
     try {

@@ -3,7 +3,7 @@ import pool from '@/lib/db';
 import { useSession } from 'next-auth/react';
 
 export async function GET() {
-  const res = await pool.query('SELECT id, nama_jenis FROM "JENIS_HEWAN"');
+  const res = await pool.query('SELECT id, nama_jenis FROM "jenis_hewan"');
   return NextResponse.json(res.rows);
 }
 
