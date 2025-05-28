@@ -9,12 +9,23 @@ export default function ListPets() {
   const [pets, setPets] = useState<Pet[]>([]);
 
   useEffect(() => {
-    setPets([
-      { key: 'PET001', pemilik: 'John Doe', jenis: 'Kucing', nama: 'Snowy', tanggal_lahir: '2020-02-09', url_foto: 'https://example.com/snowy.jpg' },
-      { key: 'PET002', pemilik: 'PT Pecinta Kucing', jenis: 'Anjing', nama: 'Blacky', tanggal_lahir: '2019-11-15', url_foto: 'https://example.com/blacky.jpg' },
-      { key: 'PET003', pemilik: 'PT Aku Sayang Hewan', jenis: 'Hamster', nama: 'Hamseoung', tanggal_lahir: '2024-10-15', url_foto: 'https://example.com/hamseoung.jpg' },
-    ]);
+    const fetchPets = async () => {
+      const res = await fetch('/api/hewan-peliharaan');
+      if (res.ok) {
+        const data = await res.json();
+        setPets(data.map((p: any, i: number) => ({
+          key: `${p.nama}_${p.no_identitas_klien}`,
+          pemilik: p.no_identitas_klien,
+          jenis: p.nama_jenis,
+          nama: p.nama,
+          tanggal_lahir: p.tanggal_lahir,
+          url_foto: p.url_foto,
+        })));
+      }
+    };
+    fetchPets();
   }, []);
+
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-8">

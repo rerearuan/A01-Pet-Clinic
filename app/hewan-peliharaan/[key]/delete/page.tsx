@@ -10,14 +10,24 @@ export default function DeletePet() {
   const router = useRouter();
 
   useEffect(() => {
-    // Dummy fetch by key
-    setPetName('Snowy');
-    setOwnerName('John Doe');
+    const fetchPet = async () => {
+      const res = await fetch(`/api/hewan-peliharaan/${key}`);
+      if (res.ok) {
+        const data = await res.json();
+        setPetName(data.nama);
+        setOwnerName(data.no_identitas_klien);
+      }
+    };
+    if (key) fetchPet();
   }, [key]);
 
-  const handleDelete = () => {
-    // TODO: DELETE /api/hewan-peliharaan/[key]
-    router.push('/hewan-peliharaan');
+  const handleDelete = async () => {
+    try {
+      await fetch(`/api/hewan-peliharaan/${key}`, { method: 'DELETE' });
+      router.push('/hewan-peliharaan');
+    } catch (err) {
+      console.error('Delete error:', err);
+    }
   };
 
   return (

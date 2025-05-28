@@ -3,9 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import Select from 'react-select';
 
 export default function UpdatePet() {
   const { key } = useParams();
+  const [owners, setOwners] = useState<{ id: string; label: string }[]>([]);
+  const [jenisList, setJenisList] = useState<{ id: string; label: string }[]>([]);
   const [pet, setPet] = useState<{
     pemilik: string;
     jenis: string;
@@ -16,15 +19,61 @@ export default function UpdatePet() {
   const router = useRouter();
 
   useEffect(() => {
-    // Dummy fetch by key
-    setPet({
-      pemilik: 'John Doe',
-      jenis: 'Kucing',
-      nama: 'Snowy',
-      tanggal_lahir: '2020-02-09',
-      url_foto: 'https://example.com/snowy.jpg',
-    });
+    const fetchData = async () => {
+      try {
+        const [resPet, resJenis, resKlien] = await Promise.all([
+          fetch(`/api/hewan-peliharaan/${key}`),
+          fetch('/api/jenis-hewan'),
+          fetch('/api/client'),
+        ]);
+
+        if (resJenis.ok) {
+          const jenisData = await resJenis.json();
+          setJenisList(jenisData.map((j: any) => ({
+            id: j.id,
+            label: j.nama_jenis
+          })));
+        }
+
+        if (resKlien.ok) {
+          const klienData = await resKlien.json();
+          setOwners(klienData.map((k: any) => ({
+            id: k.no_identitas,
+            label: `${k.nama} (${k.no_identitas.slice(0, 8)}...)`
+          })));
+        }
+
+        if (resPet.ok) {
+          const data = await resPet.json();
+          setPet({
+            pemilik: data.no_identitas_klien,
+            jenis: data.id_jenis,
+            nama: data.nama,
+            tanggal_lahir: data.tanggal_lahir,
+            url_foto: data.url_foto,
+          });
+        }
+      } catch (err) {
+        console.error('Fetch error:', err);
+      }
+    };
+
+
+    if (key) fetchData();
   }, [key]);
+
+  const handleUpdate = async () => {
+    try {
+      await fetch(`/api/hewan-peliharaan/${key}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pet),
+      });
+      router.push('/hewan-peliharaan');
+    } catch (err) {
+      console.error('Update error:', err);
+    }
+  };
 
   if (!pet) {
     return (
@@ -33,11 +82,6 @@ export default function UpdatePet() {
       </div>
     );
   }
-
-  const handleUpdate = () => {
-    // TODO: PUT /api/hewan-peliharaan/[key]
-    router.push('/hewan-peliharaan');
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-8">
@@ -49,22 +93,25 @@ export default function UpdatePet() {
           </Link>
         </div>
         <div className="space-y-4">
-          <div>
-            <label className="block text-gray-700 font-semibold mb-1">Pemilik</label>
-            <input
-              type="text"
-              value={pet.pemilik}
-              disabled
-              className="w-full border border-gray-200 bg-gray-100 rounded-lg px-4 py-2"
-            />
-          </div>
+            <div>
+              <label className="block text-gray-700 font-semibold mb-1">Pemilik</label>
+              <input
+                type="text"
+                value={owners.find(o => o.id === pet.pemilik)?.label || pet.pemilik}
+                disabled
+                className="w-full border border-gray-200 bg-gray-100 rounded-lg px-4 py-2"
+              />
+            </div>
           <div>
             <label className="block text-gray-700 font-semibold mb-1">Jenis Hewan</label>
-            <input
-              type="text"
-              value={pet.jenis}
-              onChange={e => setPet({ ...pet, jenis: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-orange-300 focus:border-orange-300"
+            <Select
+              value={jenisList.find(j => j.id === pet.jenis) || null}
+              onChange={(option) => setPet({ ...pet, jenis: option?.id || '' })}
+              options={jenisList}
+              getOptionLabel={(j) => j.label}
+              getOptionValue={(j) => j.id}
+              placeholder="Pilih Jenis Hewan"
+              isSearchable
             />
           </div>
           <div>
@@ -73,7 +120,7 @@ export default function UpdatePet() {
               type="text"
               value={pet.nama}
               onChange={e => setPet({ ...pet, nama: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-orange-300 focus:border-orange-300"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2"
             />
           </div>
           <div>
@@ -82,7 +129,7 @@ export default function UpdatePet() {
               type="date"
               value={pet.tanggal_lahir}
               onChange={e => setPet({ ...pet, tanggal_lahir: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-orange-300 focus:border-orange-300"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2"
             />
           </div>
           <div>
@@ -91,7 +138,7 @@ export default function UpdatePet() {
               type="text"
               value={pet.url_foto}
               onChange={e => setPet({ ...pet, url_foto: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-orange-300 focus:border-orange-300"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2"
             />
           </div>
         </div>
