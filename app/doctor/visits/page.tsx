@@ -23,9 +23,9 @@ interface Kunjungan {
 }
 
 export interface RekamMedis {
-  bodyTemperature: number;
-  bodyWeight: number;
-  catatan: string;
+  bodyTemperature: number | null;
+  bodyWeight: number | null;
+  catatan: string | null;
 }
 
 export interface StaffMember {
@@ -745,6 +745,24 @@ const formatDateTimeForInput = (dateString: string) => {
                     if (userRole === "individu" || userRole === "perusahaan" ) return visit.clientId === id_user;
                     
                     return false;
+                  }).sort((a, b) => {
+                    // Convert dates to a comparable format (e.g., milliseconds since epoch)
+                    const dateA = a.endTime ? new Date(a.endTime).getTime() : new Date(a.startTime).getTime();
+                    const dateB = b.endTime ? new Date(b.endTime).getTime() : new Date(b.startTime).getTime();
+
+                    // Handle null/undefined end dates:
+                    // If both have endTime, sort by endTime
+                    // If one has endTime and the other doesn't, the one with endTime comes first (unless we want nulls last)
+                    // If neither has endTime, sort by startDate
+
+                    // For sorting with nulls last:
+                    // If a.endTime is null and b.endTime is not null, b comes first (-1)
+                    if (a.endTime === null && b.endTime !== null) return 1; // b comes first, so a goes to the end
+                    // If b.endTime is null and a.endTime is not null, a comes first (1)
+                    if (b.endTime === null && a.endTime !== null) return -1; // a comes first, so b goes to the end
+
+                    // If both have endTime or both have null endTime, sort by their respective dates (endTime if present, else startDate)
+                    return dateB - dateA; // For descending order (most recent first)
                   }).map((visit) => (
                   <tr key={visit.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 whitespace-nowrap text-sm">{visit.id}</td>

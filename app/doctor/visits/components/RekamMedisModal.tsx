@@ -36,8 +36,8 @@ export default function RekamMedisModal({
 }: RekamMedisModalProps) {
   const [formData, setFormData] = useState<RekamMedis>(
     existingData || {
-      bodyTemperature: 0,
-      bodyWeight: 0,
+      bodyTemperature: null, // Change to null for initial empty state
+      bodyWeight: null,      // Change to null for initial empty state
       catatan: '',
     }
   );
@@ -46,35 +46,59 @@ export default function RekamMedisModal({
   const [showForm, setShowForm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<{ bodyTemperature?: string; bodyWeight?: string; catatan?: string; general?: string }>({});
 
   useEffect(() => {
-    if (existingData && (existingData.bodyTemperature!==null || existingData.bodyWeight!==null || existingData.catatan!==null)) {
+    if (existingData && (existingData.bodyTemperature !== null || existingData.bodyWeight !== null || existingData.catatan !== null)) {
       setFormData(existingData);
+    } else {
+      setFormData({ bodyTemperature: null, bodyWeight: null, catatan: '' });
     }
   }, [existingData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear the specific error when the user starts typing in that field
+    setErrors(prev => ({ ...prev, [name]: undefined, general: undefined }));
+
+    if (name === "bodyTemperature") {
+      setFormData(prev => ({ ...prev, [name]: value === '' ? null : parseInt(value) }));
+    } else if (name === "bodyWeight") {
+      setFormData(prev => ({ ...prev, [name]: value === '' ? null : parseFloat(value) }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setErrors({}); // Clear all errors at the start of submission
     setIsSubmitting(true);
 
+    let newErrors: { bodyTemperature?: string; bodyWeight?: string; catatan?: string; general?: string } = {};
+    const bodyTemperature = Number(formData.bodyTemperature);
+    const bodyWeight = Number(formData.bodyWeight);
+
+    if (isNaN(bodyTemperature) || formData.bodyTemperature === null) {
+      newErrors.bodyTemperature = 'Suhu tubuh harus berupa angka bulat dan tidak boleh kosong.';
+    } else if (bodyTemperature < 30 || bodyTemperature > 45) {
+      newErrors.bodyTemperature = 'Suhu tubuh harus antara 30 dan 45 °C.';
+    }
+
+    if (isNaN(bodyWeight) || formData.bodyWeight === null) {
+      newErrors.bodyWeight = 'Berat badan harus berupa angka dan tidak boleh kosong.';
+    } else if (bodyWeight <= 0) {
+      newErrors.bodyWeight = 'Berat badan harus lebih dari 0 kg.';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setIsSubmitting(false);
+      toast.error('Harap perbaiki kesalahan dalam formulir.');
+      return;
+    }
+
     try {
-      const bodyTemperature = Number(formData.bodyTemperature);
-      const bodyWeight = Number(formData.bodyWeight);
-
-      if (isNaN(bodyTemperature)) {
-        throw new Error('Suhu tubuh harus berupa angka');
-      }
-      if (isNaN(bodyWeight)) {
-        throw new Error('Berat badan harus berupa angka');
-      }
-
       const completeData = {
         bodyTemperature,
         bodyWeight,
@@ -87,37 +111,19 @@ export default function RekamMedisModal({
       };
 
       if (onSubmit) {
-        console.log("bisaa");
         onSubmit({ bodyTemperature, bodyWeight, catatan: formData.catatan });
       }
       await updateRekamMedis(id, completeData);
-
-
       toast.success('Rekam medis berhasil diperbarui');
       onClose();
     } catch (error) {
       console.error('Error updating medical record:', error);
-      setError(error instanceof Error ? error.message : 'Terjadi kesalahan');
+      setErrors(prev => ({ ...prev, general: error instanceof Error ? error.message : 'Terjadi kesalahan saat menyimpan.' }));
       toast.error('Gagal memperbarui rekam medis');
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  const creatingRekamMedis = async (id: string, data: any) => {
-    const response = await fetch(`/api/visits/rekam_medis/${id}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Gagal membuat rekam medis');
-    }
-  }
 
   const updateRekamMedis = async (id: string, data: any) => {
     const response = await fetch(`/api/visits/rekam_medis/${id}`, {
@@ -138,19 +144,22 @@ export default function RekamMedisModal({
 
   const handleCreateClick = () => {
     setShowForm(true);
+    setErrors({}); // Clear errors when starting to create
   };
 
   const handleEditClick = () => {
     setIsEditing(true);
+    setErrors({}); // Clear errors when starting to edit
   };
 
   const handleCancel = () => {
-    setError(null);
-    if (existingData && (existingData.bodyTemperature!==null || existingData.bodyWeight!==null || existingData.catatan!==null)) {
+    setErrors({}); // Clear errors on cancel
+    if (existingData && (existingData.bodyTemperature !== null || existingData.bodyWeight !== null || existingData.catatan !== null)) {
       setIsEditing(false);
       setFormData(existingData);
     } else {
       setShowForm(false);
+      setFormData({ bodyTemperature: null, bodyWeight: null, catatan: '' }); // Reset form data if creating and canceling
     }
   };
 
@@ -169,13 +178,16 @@ export default function RekamMedisModal({
     );
   }
 
-  if ((existingData && isEditing) || (existingData && (existingData.bodyTemperature===null && existingData.bodyWeight===null && existingData.catatan===null) && showForm)) {
+  // Determine if the form should be shown (either editing existing data or creating new when no data exists)
+  const shouldShowForm = (existingData && isEditing) || (!existingData && showForm) || (existingData && existingData.bodyTemperature === null && existingData.bodyWeight === null && existingData.catatan === null && showForm);
+
+  if (shouldShowForm) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg p-6 w-full max-w-md">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">
-              {existingData && (existingData.bodyTemperature!==null || existingData.bodyWeight!==null || existingData.catatan!==null) ? 'Edit Rekam Medis' : 'Buat Rekam Medis'}
+              {existingData && (existingData.bodyTemperature !== null || existingData.bodyWeight !== null || existingData.catatan !== null) ? 'Edit Rekam Medis' : 'Buat Rekam Medis'}
             </h2>
             <button
               onClick={handleCancel}
@@ -197,14 +209,12 @@ export default function RekamMedisModal({
                   type="number"
                   step="1"
                   name="bodyTemperature"
-                  value={formData.bodyTemperature}
+                  value={formData.bodyTemperature === null ? '' : formData.bodyTemperature}
                   onChange={handleChange}
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                  required
-                  min="30"
-                  max="45"
+                  className={`w-full p-2 border ${errors.bodyTemperature ? 'border-red-500' : 'border-gray-300'} rounded-md`}
                   aria-label="Body temperature"
                 />
+                {errors.bodyTemperature && <p className="text-red-500 text-xs mt-1">{errors.bodyTemperature}</p>}
               </div>
 
               <div>
@@ -216,13 +226,12 @@ export default function RekamMedisModal({
                   type="number"
                   step="0.1"
                   name="bodyWeight"
-                  value={formData.bodyWeight}
+                  value={formData.bodyWeight === null ? '' : formData.bodyWeight}
                   onChange={handleChange}
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                  required
-                  min="0.1"
+                  className={`w-full p-2 border ${errors.bodyWeight ? 'border-red-500' : 'border-gray-300'} rounded-md`}
                   aria-label="Body weight"
                 />
+                {errors.bodyWeight && <p className="text-red-500 text-xs mt-1">{errors.bodyWeight}</p>}
               </div>
 
               <div>
@@ -232,17 +241,18 @@ export default function RekamMedisModal({
                 <textarea
                   id="catatan"
                   name="catatan"
-                  value={formData.catatan}
+                  value={formData.catatan === null ? '' : formData.catatan}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className={`w-full p-2 border ${errors.catatan ? 'border-red-500' : 'border-gray-300'} rounded-md`}
                   aria-label="Medical notes"
                 />
+                {errors.catatan && <p className="text-red-500 text-xs mt-1">{errors.catatan}</p>}
               </div>
 
-              {error && (
+              {errors.general && (
                 <div className="text-red-500 text-sm mt-2">
-                  {error}
+                  {errors.general}
                 </div>
               )}
 
@@ -282,7 +292,7 @@ export default function RekamMedisModal({
     );
   }
 
-  if (existingData&&(existingData.bodyTemperature!==null || existingData.bodyWeight!==null || existingData.catatan!==null)) {
+  if (existingData && (existingData.bodyTemperature !== null || existingData.bodyWeight !== null || existingData.catatan !== null)) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg p-6 w-full max-w-md">
@@ -305,13 +315,13 @@ export default function RekamMedisModal({
               </div>
               <div>
                 <p className="text-sm text-gray-500">Berat Badan</p>
-                <p className="font-medium">{existingData.bodyWeight||0} kg</p>
+                <p className="font-medium">{existingData.bodyWeight || 0} kg</p>
               </div>
             </div>
 
             <div>
               <p className="text-sm text-gray-500">Catatan</p>
-              <p className="font-medium whitespace-pre-line">{existingData.catatan|| ''}</p>
+              <p className="font-medium whitespace-pre-line">{existingData.catatan || 'Tidak ada catatan.'}</p>
             </div>
 
             <div className="flex justify-end space-x-3">
@@ -375,7 +385,6 @@ export default function RekamMedisModal({
           </div>
         </div>
       </div>
-      </div>
-      
-    );
-  }
+    </div>
+  );
+}

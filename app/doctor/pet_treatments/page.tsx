@@ -1,6 +1,8 @@
 'use client';
+
 import { useSession } from 'next-auth/react';
 import { useState, useEffect, useRef } from 'react';
+import Select from 'react-select'; // Import react-select
 import { StaffMember } from '../visits/page';
 import { StaffRole } from '../visits/page';
 import { Klien } from '../visits/page';
@@ -34,14 +36,14 @@ interface TreatmentName {
   name: string;
 }
 
-interface Email{
+interface Email {
   id: string;
   email_user: string;
 }
 
 export interface Visit {
   visitId: string;
-  animalname : string;
+  animalname: string;
   clientid: string;
   frontdeskid: string;
   doctorid: string;
@@ -64,7 +66,7 @@ export default function TreatmentManagement() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [currentTreatment, setCurrentTreatment] = useState<VisitedTreatment| null>(null);
+  const [currentTreatment, setCurrentTreatment] = useState<VisitedTreatment | null>(null);
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [notesValue, setNotesValue] = useState('');
   const [formData, setFormData] = useState<FormData>({
@@ -90,13 +92,13 @@ export default function TreatmentManagement() {
           throw new Error('Failed to fetch treatments');
         }
         const json = await res.json();
-        setTreatments(json.data); // <-- ini bagian penting
+        setTreatments(json.data);
       } catch (error) {
         setError(error instanceof Error ? error.message : 'An unknown error occurred');
       } finally {
         setLoading(false);
       }
-    };    
+    };
 
     fetchData();
   }, []);
@@ -121,7 +123,6 @@ export default function TreatmentManagement() {
         const res = await fetch('/api/pet_treatments/get_visit_id');
         if (!res.ok) throw new Error('Failed to fetch visits');
         const json = await res.json();
-        // json.data sudah berupa array Visit
         setAvailableVisits(json.data);
       } catch (error) {
         console.error(error);
@@ -131,33 +132,33 @@ export default function TreatmentManagement() {
     fetchVisitTreatment();
   }, []);
   console.log('fetch visit semua', availableVisits)
-    
-  useEffect(() => {
-  const fetchTreatmentCode = async () => {
-    try {
-      const res = await fetch('/api/pet_treatments/get_treatment_code');
-      if (!res.ok) throw new Error('Failed to fetch treatments');
-      const json = await res.json();
-      console.log('Response JSON:', json);
-      
-      // Create an array of objects with both code and name
-      const treatments = json.data.map((item: { 
-        kode_perawatan: string, 
-        nama_perawatan: string 
-      }) => ({
-        code: item.kode_perawatan,
-        name: item.nama_perawatan
-      }));
-      
-      console.log('Treatments:', treatments);
-      setAvailableTreatments(treatments);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
-  fetchTreatmentCode();
-}, []);
+  useEffect(() => {
+    const fetchTreatmentCode = async () => {
+      try {
+        const res = await fetch('/api/pet_treatments/get_treatment_code');
+        if (!res.ok) throw new Error('Failed to fetch treatments');
+        const json = await res.json();
+        console.log('Response JSON:', json);
+
+        // Create an array of objects with both code and name
+        const treatments = json.data.map((item: {
+          kode_perawatan: string,
+          nama_perawatan: string
+        }) => ({
+          code: item.kode_perawatan,
+          name: item.nama_perawatan
+        }));
+
+        console.log('Treatments:', treatments);
+        setAvailableTreatments(treatments);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchTreatmentCode();
+  }, []);
 
   useEffect(() => {
     const fetchStaffData = async () => {
@@ -175,17 +176,17 @@ export default function TreatmentManagement() {
   }, []);
 
   const getIdByEmail = (email: string): string | undefined => {
-  // Cari di data staff terlebih dahulu
-  const staff = staffMembers.find(member => member.email_user === email);
-  if (staff) return staff.id;
+    // Cari di data staff terlebih dahulu
+    const staff = staffMembers.find(member => member.email_user === email);
+    if (staff) return staff.id;
 
-  // Jika tidak ditemukan di staff, cari di data client
-  const client = clients.find(client => client.email === email);
-  return client?.no_identitas;
-};
+    // Jika tidak ditemukan di staff, cari di data client
+    const client = clients.find(client => client.email === email);
+    return client?.no_identitas;
+  };
 
-const id_user = getIdByEmail(session?.user.email||'');
-  
+  const id_user = getIdByEmail(session?.user.email || '');
+
 
   // Sinkronisasi notesValue ketika treatmentNotes berubah
   useEffect(() => {
@@ -204,6 +205,7 @@ const id_user = getIdByEmail(session?.user.email||'');
   const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNotesValue(e.target.value);
   };
+
   const fetchVisitDetail = async (visitId: string) => {
     const res = await fetch(`/api/pet_treatments/${visitId}`);
     if (!res.ok) throw new Error('Failed to fetch visit detail');
@@ -234,31 +236,31 @@ const id_user = getIdByEmail(session?.user.email||'');
         no_dokter_hewan: formData.doctorId,
         kode_perawatan: formData.treatmentCode
       };
-  
+
       console.log('Sending POST request with:', requestBody);
-  
+
       const response = await fetch('/api/pet_treatments/get_or_post_pet_treatments', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestBody),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Error response:', errorData);
         throw new Error(errorData.message || 'Failed to create treatment');
       }
-  
+
       const result = await response.json();
       console.log('Success:', result);
-  
+
       // Refresh data treatments setelah berhasil create
       const refreshResponse = await fetch('/api/pet_treatments/get_or_post_pet_treatments');
       const refreshData = await refreshResponse.json();
       setTreatments(refreshData.data);
-  
+
       setShowCreateModal(false);
       resetForm();
     } catch (error) {
@@ -267,54 +269,65 @@ const id_user = getIdByEmail(session?.user.email||'');
     }
   };
 
-  const handleVisitSelect = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const visitId = e.target.value;
+  // Modified handleVisitSelect for react-select
+  const handleVisitSelect = async (selectedOption: { value: string; label: React.ReactNode } | null) => {
+    const visitId = selectedOption ? selectedOption.value : '';
     if (visitId) {
       await fetchVisitDetail(visitId);
     }
   };
-  
+
 
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!currentTreatment) return;
-  
+
     try {
+      // Perhatikan bahwa kita mengirim kode_perawatan_lama dari currentTreatment
+      // dan kode_perawatan_baru dari formData (yang diisi oleh user di modal)
+      const requestBody = {
+        kode_perawatan_baru: formData.treatmentCode,
+        kode_perawatan_lama: currentTreatment.treatmentCode,
+        // Parameter lain yang diperlukan oleh WHERE clause di backend
+        nama_hewan: currentTreatment.animalName, // Menggunakan currentTreatment karena ini adalah kunci identifikasi
+        no_identitas_klien: currentTreatment.clientId,
+        no_front_desk: currentTreatment.frontDeskId,
+        no_perawat_hewan: currentTreatment.nurseId,
+        no_dokter_hewan: currentTreatment.doctorId,
+      };
+
+      console.log('Frontend PUT: Sending request body:', requestBody);
+      console.log('Frontend PUT: Sending to URL:', `/api/pet_treatments/${currentTreatment.visitId}`);
+
       const response = await fetch(`/api/pet_treatments/${currentTreatment.visitId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-        visitId: currentTreatment.visitId,
-        nama_hewan: formData.animalName,
-        no_identitas_klien: formData.clientId,
-        no_front_desk: formData.frontDeskId,
-        no_perawat_hewan: formData.nurseId,
-        no_dokter_hewan: formData.doctorId,
-        kode_perawatan_baru: formData.treatmentCode,  // kode baru
-        kode_perawatan_lama: currentTreatment.treatmentCode, // kode lama, dari data sebelumnya
-      }),
+        body: JSON.stringify(requestBody),
       });
-  
+
       if (!response.ok) {
-        throw new Error('Failed to update treatment');
+        const errorData = await response.json();
+        console.error('Frontend PUT: Error response:', errorData);
+        throw new Error(errorData.message || 'Failed to update treatment');
       }
-  
+
       const result = await response.json();
-      const updatedTreatment = result.data;
-  
-      setTreatments((prev) =>
-        prev.map((t) =>
-          t.visitId === updatedTreatment.visitId ? updatedTreatment : t
-        )
-      );
+      console.log('Frontend PUT: Success response:', result);
+
       setShowUpdateModal(false);
+      // Memanggil fetchData untuk merefresh data setelah update
+      // Ini adalah cara paling andal untuk memastikan data di tabel konsisten
+      const refreshResponse = await fetch('/api/pet_treatments/get_or_post_pet_treatments');
+      const refreshData = await refreshResponse.json();
+      setTreatments(refreshData.data);
     } catch (error) {
+      console.error('Frontend PUT: Error in handleUpdate:', error);
       setError(error instanceof Error ? error.message : 'Failed to update treatment');
     }
   };
-  
+
 
   // Delete treatment
   const handleDelete = async () => {
@@ -333,14 +346,14 @@ const id_user = getIdByEmail(session?.user.email||'');
           frontDeskId: currentTreatment.frontDeskId,
           nurseId: currentTreatment.nurseId,
           doctorId: currentTreatment.doctorId,
-          treatmentCode : currentTreatment.treatmentCode
+          treatmentCode: currentTreatment.treatmentCode
         }),
-      });      
+      });
 
       if (!response.ok) {
         throw new Error('Failed to delete treatment');
       }
-      
+
 
       const refreshResponse = await fetch('/api/pet_treatments/get_or_post_pet_treatments');
       const refreshData = await refreshResponse.json();
@@ -368,7 +381,7 @@ const id_user = getIdByEmail(session?.user.email||'');
 
   // Prepare update modal
   const prepareUpdate = (treatment: VisitedTreatment) => {
-    setCurrentTreatment(treatment);
+    setCurrentTreatment(treatment); // Menyimpan objek treatment lengkap
     setFormData({
       visitId: treatment.visitId,
       animalName: treatment.animalName,
@@ -376,7 +389,7 @@ const id_user = getIdByEmail(session?.user.email||'');
       frontDeskId: treatment.frontDeskId,
       nurseId: treatment.nurseId,
       doctorId: treatment.doctorId,
-      treatmentCode: treatment.treatmentCode,
+      treatmentCode: treatment.treatmentCode, // Ini adalah kode perawatan LAMA saat ini
       treatmentNotes: treatment.treatmentNotes,
     });
     setNotesValue(treatment.treatmentNotes);
@@ -394,80 +407,123 @@ const id_user = getIdByEmail(session?.user.email||'');
     return name.charAt(0).toUpperCase() + name.slice(1);
   }
 
-  const TreatmentFormModal = ({ isUpdate = false }: { isUpdate?: boolean }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-        <div className="p-6">
-          <h2 className="text-xl font-bold mb-6 text-center">
-            {isUpdate ? 'Update Treatment' : 'Create New Treatment'}
-          </h2>
+  // Custom styles for react-select to handle multi-line labels
+  const customStyles = {
+    option: (provided: any) => ({
+      ...provided,
+      whiteSpace: 'normal', // Allow text to wrap
+      height: 'auto', // Adjust height based on content
+      padding: '8px 12px', // Add some padding
+      borderBottom: '1px dotted #ccc', // Optional: separator
+    }),
+    singleValue: (provided: any) => ({
+      ...provided,
+      whiteSpace: 'normal',
+      overflow: 'visible',
+      textOverflow: 'unset',
+      height: 'auto',
+    }),
+    control: (provided: any) => ({
+      ...provided,
+      height: 'auto', // Allow control to grow with content
+      minHeight: '38px', // Default min-height
+    }),
+    menu: (provided: any) => ({
+      ...provided,
+      zIndex: 9999, // Ensure the dropdown is above other elements
+    }),
+  };
 
-          <form onSubmit={isUpdate ? handleUpdate : handleCreate} className="space-y-6">
-            <div>
-              <h3 className="font-medium mb-2">Kunjungan</h3>
-              <select
-                name="visitId"
-                value={formData.visitId}
-                onChange={handleVisitSelect}
-                className="w-full border border-gray-300 rounded-md p-2"
-                required
-                disabled={isUpdate}
-              >
-                <option value="">Pilih Kunjungan</option>
-                {availableVisits
-                  .filter((visit) => visit.doctorid === id_user)
-                  .map((visit) => {
-                    const frontDeskEmail = staffMembers.find(staff => staff.id === visit.frontdeskid)?.email_user || visit.frontdeskid;
-                    const doctorEmail = staffMembers.find(staff => staff.id === visit.doctorid)?.email_user || visit.doctorid;
-                    const nurseEmail = staffMembers.find(staff => staff.id === visit.nurseid)?.email_user || visit.nurseid;
 
-                    return (
-                      <option key={visit.visitId} value={visit.visitId}>
-                        {`ID Kunjungan: ${visit.visitId} | Nama Hewan: ${visit.animalname} | ID Klien: ${visit.clientid} | Front Desk: ${frontDeskEmail} | Dokter: ${doctorEmail} | Perawat: ${nurseEmail}`}
-                      </option>
-                    );
-                  })}
-              </select>
-            </div>
+  const TreatmentFormModal = ({ isUpdate = false }: { isUpdate?: boolean }) => {
+    // Map availableVisits to options for react-select
+    const visitOptions = filteredVisits.map((visit) => {
+      const frontDeskEmail = staffMembers.find(staff => staff.id === visit.frontdeskid)?.email_user || visit.frontdeskid;
+      const doctorEmail = staffMembers.find(staff => staff.id === visit.doctorid)?.email_user || visit.doctorid;
+      const nurseEmail = staffMembers.find(staff => staff.id === visit.nurseid)?.email_user || visit.nurseid;
 
-            <div>
-              <h3 className="font-medium mb-2">Jenis Perawatan</h3>
-              <select
-                name="treatmentCode"
-                value={formData.treatmentCode}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md p-2"
-                required
-              >
-                <option value="">Jenis Perawatan</option>
+      return {
+        value: visit.visitId,
+        label: (
+          <div>
+            <div>ID Kunjungan: {visit.visitId}</div>
+            <div>Nama Hewan: {visit.animalname}</div>
+            <div>ID Klien: {visit.clientid}</div>
+            <div>Front Desk: {formatEmailName(frontDeskEmail)}</div>
+            <div>Dokter: {formatEmailName(doctorEmail)}</div>
+            <div>Perawat: {formatEmailName(nurseEmail)}</div>
+          </div>
+        ),
+      };
+    });
+
+    // Find the currently selected option object for react-select
+    const selectedVisitOption = visitOptions.find(option => option.value === formData.visitId) || null;
+
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+          <div className="p-6">
+            <h2 className="text-xl font-bold mb-6 text-center">
+              {isUpdate ? 'Update Treatment' : 'Create New Treatment'}
+            </h2>
+
+            <form onSubmit={isUpdate ? handleUpdate : handleCreate} className="space-y-6">
+              <div>
+                <h3 className="font-medium mb-2">Kunjungan</h3>
+                <Select
+                  name="visitId"
+                  options={visitOptions}
+                  value={selectedVisitOption} // Set value as the selected option object
+                  onChange={handleVisitSelect} // Use the modified handler
+                  className="w-full"
+                  classNamePrefix="react-select" // Optional: for custom styling
+                  isDisabled={isUpdate} // Disable if updating
+                  placeholder="Pilih Kunjungan"
+                  styles={customStyles} // Apply custom styles
+                />
+              </div>
+
+              <div>
+                <h3 className="font-medium mb-2">Jenis Perawatan</h3>
+                <select
+                  name="treatmentCode"
+                  value={formData.treatmentCode}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-md p-2"
+                  required
+                >
+                  <option value="">Jenis Perawatan</option>
                   {availableTreatments.map((treatment) => (
                     <option key={treatment.code} value={treatment.code}>
-                      {treatment.name}  {/* Tampilkan nama, tapi value-nya adalah kode */}
+                      {treatment.name} {/* Tampilkan nama, tapi value-nya adalah kode */}
                     </option>
-                ))}
-              </select>
-            </div>
+                  ))}
+                </select>
+              </div>
 
-            <div className="flex justify-center space-x-4 pt-4">
-              <button
-                type="button"
-                onClick={isUpdate ? () => setShowUpdateModal(false) : () => setShowCreateModal(false)}
-                className="px-6 py-2 border border-gray-300 rounded-md font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-6 py-2 bg-[#FD7E14] text-white rounded-md font-medium"
-              >
-                {isUpdate ? 'Update' : 'Create'}
-              </button>
-            </div>
-          </form>
+              <div className="flex justify-center space-x-4 pt-4">
+                <button
+                  type="button"
+                  onClick={isUpdate ? () => setShowUpdateModal(false) : () => setShowCreateModal(false)}
+                  className="px-6 py-2 border border-gray-300 rounded-md font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-[#FD7E14] text-white rounded-md font-medium"
+                >
+                  {isUpdate ? 'Update' : 'Create'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Delete Confirmation Modal
   const DeleteConfirmationModal = () => (
@@ -526,7 +582,7 @@ const id_user = getIdByEmail(session?.user.email||'');
         </div>
 
         <div className="mb-4 flex justify-end">
-          {userRole==='dokter-hewan' && <button
+          {userRole === 'dokter-hewan' && <button
             onClick={() => {
               resetForm();
               setCurrentTreatment(null);
@@ -572,18 +628,18 @@ const id_user = getIdByEmail(session?.user.email||'');
 
             <tbody>
               {treatments.filter(treatment => {
-                    if (userRole === "front-desk") return true;
-                    
-                    if (userRole === "dokter-hewan") return treatment.doctorId === id_user;
+                if (userRole === "front-desk") return true;
 
-                    if (userRole === "perawat-hewan") return treatment.nurseId === id_user;
+                if (userRole === "dokter-hewan") return treatment.doctorId === id_user;
 
-                    if (userRole === "individu" || userRole === "perusahaan" ) return treatment.clientId === id_user;
-                    
-                    return false;
-                  }).map((treatment, index) => (
-                <tr 
-                  key={`${treatment.animalName}-${treatment.clientId}-${treatment.frontDeskId}-${treatment.nurseId}-${treatment.doctorId}-${treatment.treatmentCode}`} 
+                if (userRole === "perawat-hewan") return treatment.nurseId === id_user;
+
+                if (userRole === "individu" || userRole === "perusahaan") return treatment.clientId === id_user;
+
+                return false;
+              }).map((treatment, index) => (
+                <tr
+                  key={`${treatment.animalName}-${treatment.clientId}-${treatment.frontDeskId}-${treatment.nurseId}-${treatment.doctorId}-${treatment.treatmentCode}`}
                   className="border-t hover:bg-gray-50"
                 >
                   <td className="px-4 py-3 text-sm">{index + 1}</td>
@@ -591,7 +647,7 @@ const id_user = getIdByEmail(session?.user.email||'');
                   <td className="px-4 py-3 text-sm">{treatment.animalName}</td>
                   <td className="px-4 py-3 text-sm">{treatment.clientId}</td>
                   <td className="px-4 py-3 text-sm">
-                      {formatEmailName(staffMembers.find(staff => staff.id === treatment.frontDeskId)?.email_user|| treatment.frontDeskId)}
+                    {formatEmailName(staffMembers.find(staff => staff.id === treatment.frontDeskId)?.email_user || treatment.frontDeskId)}
                   </td>
                   <td className="px-4 py-3 text-sm">
                     {formatEmailName(staffMembers.find(staff => staff.id === treatment.nurseId)?.email_user || treatment.nurseId)}
@@ -603,7 +659,7 @@ const id_user = getIdByEmail(session?.user.email||'');
                     {availableTreatments.find(t => t.code === treatment.treatmentCode)?.name || treatment.treatmentCode}
                   </td>
                   <td className="px-4 py-3 text-sm space-x-2">
-                    {userRole==='dokter-hewan' && <div className="flex flex-col w-24">
+                    {userRole === 'dokter-hewan' && <div className="flex flex-col w-24">
                       <button
                         onClick={() => prepareUpdate(treatment)}
                         className="bg-black text-white px-3 py-1 rounded hover:bg-gray-800 w-full"
