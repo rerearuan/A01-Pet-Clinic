@@ -17,6 +17,7 @@ const TreatmentPage = () => {
   const [editTreatment, setEditTreatment] = useState<{ code: string, name: string, cost: string } | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [deletingTreatment, setDeletingTreatment] = useState<Treatment | null>(null);
 
   const showAlert = (type: 'success' | 'error', message: string) => {
     setAlert({ type, message });
@@ -27,13 +28,9 @@ const TreatmentPage = () => {
     try {
       const response = await fetch('/api/treatments');
       const result = await response.json();
-      
-      if (result.success) {
-        setTreatments(result.data);
-      } else {
-        showAlert('error', 'Failed to fetch treatments');
-      }
-    } catch (error) {
+      if (result.success) setTreatments(result.data);
+      else showAlert('error', 'Failed to fetch treatments');
+    } catch {
       showAlert('error', 'Network error occurred');
     } finally {
       setLoading(false);
@@ -57,12 +54,11 @@ const TreatmentPage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: newTreatment.name.trim(),
-          cost: Number(newTreatment.cost)
-        })
+          cost: Number(newTreatment.cost),
+        }),
       });
 
       const result = await response.json();
-      
       if (result.success) {
         setTreatments([...treatments, result.data]);
         setNewTreatment({ name: '', cost: '' });
@@ -70,7 +66,7 @@ const TreatmentPage = () => {
       } else {
         showAlert('error', result.error || 'Failed to create treatment');
       }
-    } catch (error) {
+    } catch {
       showAlert('error', 'Network error occurred');
     } finally {
       setSubmitting(false);
@@ -90,52 +86,46 @@ const TreatmentPage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: editTreatment.name.trim(),
-          cost: Number(editTreatment.cost)
-        })
+          cost: Number(editTreatment.cost),
+        }),
       });
 
       const result = await response.json();
-      
       if (result.success) {
-        setTreatments(treatments.map(treatment =>
-          treatment.code === editTreatment.code ? result.data : treatment
-        ));
+        setTreatments(treatments.map(t => (t.code === editTreatment.code ? result.data : t)));
         setEditTreatment(null);
         showAlert('success', 'Treatment updated successfully');
       } else {
         showAlert('error', result.error || 'Failed to update treatment');
       }
-    } catch (error) {
+    } catch {
       showAlert('error', 'Network error occurred');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDelete = async (code: string) => {
-    if (!confirm('Are you sure you want to delete this treatment?')) return;
-
+  const confirmDelete = async (code: string) => {
     try {
-      const response = await fetch(`/api/treatments/${code}`, {
-        method: 'DELETE'
-      });
-
+      const response = await fetch(`/api/treatments/${code}`, { method: 'DELETE' });
       const result = await response.json();
-      
+
       if (result.success) {
-        setTreatments(treatments.filter(treatment => treatment.code !== code));
+        setTreatments(treatments.filter(t => t.code !== code));
         showAlert('success', 'Treatment deleted successfully');
       } else {
         showAlert('error', result.error || 'Failed to delete treatment');
       }
-    } catch (error) {
+    } catch {
       showAlert('error', 'Network error occurred');
+    } finally {
+      setDeletingTreatment(null);
     }
   };
 
-  const filteredTreatments = treatments.filter(treatment =>
-    treatment.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    treatment.code.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTreatments = treatments.filter(t =>
+    t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    t.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -151,6 +141,32 @@ const TreatmentPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Delete Confirmation Modal */}
+      {deletingTreatment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800/30 backdrop-blur-sm">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl border border-gray-200">
+            <h2 className="text-xl font-bold text-red-600 mb-4">Delete Treatment Type</h2>
+            <p className="text-gray-800 mb-6">
+              Apakah kamu yakin untuk menghapus jenis perawatan <span className="font-semibold text-red-500">{deletingTreatment.name}</span> dengan Kode <span className="font-semibold text-red-500">{deletingTreatment.code}</span>?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setDeletingTreatment(null)}
+                className="px-4 py-2 rounded-md border text-gray-700 hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => confirmDelete(deletingTreatment.code)}
+                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
+              >
+                Confirm Deletion
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -386,7 +402,7 @@ const TreatmentPage = () => {
                               Edit
                             </button>
                             <button
-                              onClick={() => handleDelete(treatment.code)}
+                              onClick={() => setDeletingTreatment(treatment)}
                               className="inline-flex items-center px-3 py-1 border border-red-300 text-red-700 bg-red-50 rounded-md hover:bg-red-100 focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                             >
                               <Trash2 className="h-3 w-3 mr-1" />

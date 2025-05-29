@@ -27,8 +27,8 @@ const MedicinePage = () => {
   const [formData, setFormData] = useState<FormData>({ nama: '', harga: '', stok: '', dosis: '' });
   const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingMedicine, setDeletingMedicine] = useState<Medicine | null>(null);
 
-  // Fetch medicines from API
   const fetchMedicines = async (search = '') => {
     try {
       setLoading(true);
@@ -49,19 +49,16 @@ const MedicinePage = () => {
     }
   };
 
-  // Show notification
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });
     setTimeout(() => setNotification(null), 5000);
   };
 
-  // Handle search
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     fetchMedicines(value);
   };
 
-  // Handle create medicine
   const handleCreate = async () => {
     if (!formData.nama || !formData.harga || !formData.stok || !formData.dosis) {
       showNotification('error', 'All fields are required');
@@ -99,7 +96,6 @@ const MedicinePage = () => {
     }
   };
 
-  // Handle update medicine
   const handleUpdate = async (kode: string) => {
     if (!formData.nama || !formData.harga || !formData.stok || !formData.dosis) {
       showNotification('error', 'All fields are required');
@@ -137,10 +133,7 @@ const MedicinePage = () => {
     }
   };
 
-  // Handle delete medicine
-  const handleDelete = async (kode: string) => {
-    if (!confirm('Are you sure you want to delete this medicine?')) return;
-
+  const confirmDelete = async (kode: string) => {
     try {
       const response = await fetch(`/api/medicines/${kode}`, {
         method: 'DELETE'
@@ -157,10 +150,11 @@ const MedicinePage = () => {
     } catch (error) {
       console.error('Error deleting medicine:', error);
       showNotification('error', 'Error connecting to server');
+    } finally {
+      setDeletingMedicine(null);
     }
   };
 
-  // Start editing
   const startEdit = (medicine: Medicine) => {
     setEditingMedicine(medicine.kode);
     setFormData({
@@ -171,7 +165,6 @@ const MedicinePage = () => {
     });
   };
 
-  // Cancel editing
   const cancelEdit = () => {
     setEditingMedicine(null);
     setShowCreateForm(false);
@@ -184,6 +177,32 @@ const MedicinePage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50">
+      {/* Modal Konfirmasi Delete */}
+      {deletingMedicine && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800/30 backdrop-blur-sm">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl border border-gray-200">
+            <h2 className="text-xl font-bold text-red-600 mb-4">Delete Treatment Type</h2>
+            <p className="text-gray-800 mb-6">
+              Apakah kamu yakin untuk menghapus jenis perawatan <span className="font-semibold text-red-500">{deletingMedicine.nama}</span> dengan Kode <span className="font-semibold text-red-500">{deletingMedicine.kode}</span>?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setDeletingMedicine(null)}
+                className="px-4 py-2 rounded-md border text-gray-700 hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => confirmDelete(deletingMedicine.kode)}
+                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
+              >
+                Confirm Deletion
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -206,15 +225,9 @@ const MedicinePage = () => {
       {/* Notification */}
       {notification && (
         <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center gap-2 ${
-          notification.type === 'success' 
-            ? 'bg-green-500 text-white' 
-            : 'bg-red-500 text-white'
+          notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
         }`}>
-          {notification.type === 'success' ? (
-            <CheckCircle className="w-5 h-5" />
-          ) : (
-            <AlertCircle className="w-5 h-5" />
-          )}
+          {notification.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
           {notification.message}
         </div>
       )}
@@ -405,7 +418,7 @@ const MedicinePage = () => {
                                 <Edit className="w-4 h-4" />
                               </button>
                               <button
-                                onClick={() => handleDelete(medicine.kode)}
+                                onClick={() => setDeletingMedicine(medicine)}
                                 className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-colors duration-200"
                               >
                                 <Trash2 className="w-4 h-4" />
