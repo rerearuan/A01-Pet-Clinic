@@ -24,6 +24,13 @@ interface Prescription {
   total_harga: number;
 }
 
+// Define an interface for the API response structure
+interface ApiResponse<T> {
+  success: boolean;
+  message?: string;
+  data: T;
+}
+
 const PrescriptionPage = () => {
   const [treatments, setTreatments] = useState<Treatment[]>([]);
   const [medicines, setMedicines] = useState<Medicine[]>([]);
@@ -37,6 +44,8 @@ const PrescriptionPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [prescriptionToDelete, setPrescriptionToDelete] = useState<Prescription | null>(null);
 
   // Fetch treatments, medicines, and prescriptions on component mount
   useEffect(() => {
@@ -44,20 +53,23 @@ const PrescriptionPage = () => {
       setLoading(true);
       try {
         // Fetch treatments
-        const treatmentsRes = await fetch('/api/treatments'); // Adjust endpoint if different
-        const treatmentsData = await treatmentsRes.json();
+        const treatmentsRes = await fetch('/api/treatments');
+        // Explicitly type treatmentsData
+        const treatmentsData: ApiResponse<Treatment[]> = await treatmentsRes.json();
         if (!treatmentsData.success) throw new Error(treatmentsData.message);
         setTreatments(treatmentsData.data);
 
         // Fetch medicines
-        const medicinesRes = await fetch('/api/medicines'); // Adjust endpoint if different
-        const medicinesData = await medicinesRes.json();
+        const medicinesRes = await fetch('/api/medicines');
+        // Explicitly type medicinesData
+        const medicinesData: ApiResponse<Medicine[]> = await medicinesRes.json();
         if (!medicinesData.success) throw new Error(medicinesData.message);
         setMedicines(medicinesData.data);
 
         // Fetch prescriptions
         const prescriptionsRes = await fetch('/api/prescriptions');
-        const prescriptionsData = await prescriptionsRes.json();
+        // Explicitly type prescriptionsData
+        const prescriptionsData: ApiResponse<Prescription[]> = await prescriptionsRes.json();
         if (!prescriptionsData.success) throw new Error(prescriptionsData.message);
         setPrescriptions(prescriptionsData.data);
       } catch (err) {
@@ -78,7 +90,8 @@ const PrescriptionPage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newPrescription),
       });
-      const data = await res.json();
+      // Explicitly type data
+      const data: ApiResponse<Prescription> = await res.json();
       if (!data.success) throw new Error(data.message);
       setPrescriptions([...prescriptions, data.data]);
       setNewPrescription({ kode_perawatan: '', kode_obat: '', kuantitas_obat: 1 });
@@ -101,7 +114,8 @@ const PrescriptionPage = () => {
           body: JSON.stringify({ kuantitas_obat: editPrescription.kuantitas_obat }),
         }
       );
-      const data = await res.json();
+      // Explicitly type data
+      const data: ApiResponse<Prescription> = await res.json();
       if (!data.success) throw new Error(data.message);
       setPrescriptions(
         prescriptions.map((p) =>
@@ -118,23 +132,39 @@ const PrescriptionPage = () => {
     }
   };
 
+  // Open delete confirmation modal
+  const openDeleteModal = (prescription: Prescription) => {
+    setPrescriptionToDelete(prescription);
+    setShowDeleteModal(true);
+  };
+
   // Handle delete prescription
-  const handleDelete = async (kode_perawatan: string, kode_obat: string) => {
-    if (!confirm('Are you sure you want to delete this prescription?')) return;
+  const handleDelete = async () => {
+    if (!prescriptionToDelete) return;
+
     try {
-      const res = await fetch(`/api/prescriptions/${kode_perawatan}/${kode_obat}`, {
-        method: 'DELETE',
-      });
-      const data = await res.json();
+      const res = await fetch(
+        `/api/prescriptions/${prescriptionToDelete.kode_perawatan}/${prescriptionToDelete.kode_obat}`,
+        {
+          method: 'DELETE',
+        }
+      );
+      // Explicitly type data
+      const data: ApiResponse<any> = await res.json(); // Data from delete might just be a success message
       if (!data.success) throw new Error(data.message);
       setPrescriptions(
         prescriptions.filter(
-          (p) => p.kode_perawatan !== kode_perawatan || p.kode_obat !== kode_obat
+          (p) =>
+            p.kode_perawatan !== prescriptionToDelete.kode_perawatan ||
+            p.kode_obat !== prescriptionToDelete.kode_obat
         )
       );
       alert('Prescription deleted successfully');
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to delete prescription');
+    } finally {
+      setShowDeleteModal(false);
+      setPrescriptionToDelete(null);
     }
   };
 
@@ -168,7 +198,7 @@ const PrescriptionPage = () => {
       </nav>
 
       {/* Search Bar */}
-      <div className="max-w-4xl mx-auto mt-10 mb-5">
+      <div className="max-w-4xl mx-auto mt-10 mb-5 w-full px-4">
         <input
           type="text"
           placeholder="Search Prescription"
@@ -179,7 +209,7 @@ const PrescriptionPage = () => {
       </div>
 
       {/* Create New Prescription Form */}
-      <div className="max-w-4xl mx-auto bg-white p-6 shadow-lg rounded-xl mt-8">
+      <div className="max-w-4xl mx-auto bg-white p-6 shadow-lg rounded-xl mt-8 w-full px-4">
         <h2 className="text-2xl font-bold mb-6 text-orange-500">Create New Prescription</h2>
         <form onSubmit={handleCreate}>
           <div className="mb-4">
@@ -234,7 +264,7 @@ const PrescriptionPage = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-300 transition"
+            className="w-full bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition"
           >
             Create
           </button>
@@ -243,8 +273,8 @@ const PrescriptionPage = () => {
 
       {/* Update Prescription Form */}
       {editPrescription && (
-        <div className="max-w-4xl mx-auto bg-white p-6 shadow-lg rounded-xl mt-8">
-          <h2 className="text-2xl font-bold mb-6">Update Prescription</h2>
+        <div className="max-w-4xl mx-auto bg-white p-6 shadow-lg rounded-xl mt-8 w-full px-4">
+          <h2 className="text-2xl font-bold mb-6 text-orange-500">Update Prescription</h2>
           <form onSubmit={handleUpdate}>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Jenis Perawatan</label>
@@ -280,63 +310,122 @@ const PrescriptionPage = () => {
                 className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500"
               />
             </div>
-            <button
-              type="submit"
-              className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition"
-            >
-              Update
-            </button>
+            <div className="flex justify-end space-x-2">
+              <button
+                type="button"
+                onClick={() => setEditPrescription(null)}
+                className="bg-gray-300 text-gray-800 py-3 px-6 rounded-lg hover:bg-gray-400 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="bg-black text-white py-3 px-6 rounded-lg hover:bg-gray-800 transition"
+              >
+                Update
+              </button>
+            </div>
           </form>
         </div>
       )}
 
       {/* List Prescriptions */}
-      <div className="max-w-4xl mx-auto mt-8 bg-white p-6 shadow-lg rounded-xl">
-        <h2 className="text-2xl font-bold mb-6">List of Prescriptions</h2>
-        <table className="min-w-full table-auto">
-          <thead>
-            <tr>
-              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">No</th>
-              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">Jenis Perawatan</th>
-              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">Obat</th>
-              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">Kuantitas Obat</th>
-              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">Total Harga</th>
-              <th className="py-3 px-6 text-left text-sm font-medium text-gray-700">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredPrescriptions.map((prescription, index) => (
-              <tr key={`${prescription.kode_perawatan}-${prescription.kode_obat}`}>
-                <td className="py-3 px-6">{index + 1}</td>
-                <td className="py-3 px-6">
-                  {prescription.kode_perawatan} - {prescription.nama_perawatan}
-                </td>
-                <td className="py-3 px-6">
-                  {prescription.kode_obat} - {prescription.nama_obat}
-                </td>
-                <td className="py-3 px-6">{prescription.kuantitas_obat}</td>
-                <td className="py-3 px-6">Rp{prescription.total_harga.toLocaleString()}</td>
-                <td className="py-3 px-6 space-x-2">
-                  <button
-                    className="bg-black text-white py-1 px-3 rounded-lg hover:bg-gray-800Blog transition"
-                    onClick={() => setEditPrescription(prescription)}
-                  >
-                    Update
-                  </button>
-                  <button
-                    className="bg-red-500 text-white py-1 px-3 rounded-lg hover:bg-red-600 transition"
-                    onClick={() =>
-                      handleDelete(prescription.kode_perawatan, prescription.kode_obat)
-                    }
-                  >
-                    Delete
-                  </button>
-                </td>
+      <div className="max-w-4xl mx-auto mt-8 bg-white p-6 shadow-lg rounded-xl w-full px-4 mb-8">
+        <h2 className="text-2xl font-bold mb-6 text-orange-500">List of Prescriptions</h2>
+        <div className="overflow-x-auto">
+          <table className="min-w-full table-auto">
+            <thead>
+              <tr className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
+                <th className="py-3 px-6 text-left">No</th>
+                <th className="py-3 px-6 text-left">Jenis Perawatan</th>
+                <th className="py-3 px-6 text-left">Obat</th>
+                <th className="py-3 px-6 text-left">Kuantitas Obat</th>
+                <th className="py-3 px-6 text-left">Total Harga</th>
+                <th className="py-3 px-6 text-left">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="text-gray-600 text-sm font-light">
+              {filteredPrescriptions.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-4 text-center">
+                    No prescriptions found.
+                  </td>
+                </tr>
+              ) : (
+                filteredPrescriptions.map((prescription, index) => (
+                  <tr
+                    key={`${prescription.kode_perawatan}-${prescription.kode_obat}`}
+                    className="border-b border-gray-200 hover:bg-gray-100"
+                  >
+                    <td className="py-3 px-6 text-left whitespace-nowrap">{index + 1}</td>
+                    <td className="py-3 px-6 text-left">
+                      {prescription.kode_perawatan} - {prescription.nama_perawatan}
+                    </td>
+                    <td className="py-3 px-6 text-left">
+                      {prescription.kode_obat} - {prescription.nama_obat}
+                    </td>
+                    <td className="py-3 px-6 text-left">{prescription.kuantitas_obat}</td>
+                    <td className="py-3 px-6 text-left">Rp{prescription.total_harga.toLocaleString()}</td>
+                    <td className="py-3 px-6 text-left space-x-2">
+                      <button
+                        className="bg-black text-white py-1 px-3 rounded-lg hover:bg-gray-800 transition"
+                        onClick={() => setEditPrescription(prescription)}
+                      >
+                        Update
+                      </button>
+                      <button
+                        className="bg-red-500 text-white py-1 px-3 rounded-lg hover:bg-red-600 transition"
+                        onClick={() =>
+                          openDeleteModal(prescription)
+                        }
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full mx-4">
+            {/* Modal Title */}
+            <h3 className="text-xl font-bold mb-4 text-center text-red-500">Delete Prescription</h3>
+            {/* Confirmation Message */}
+            <p className="text-gray-700 mb-6 text-center">
+              Apakah kamu yakin untuk menghapus Prescription untuk Jenis Perawatan{' '}
+              <span className="font-bold text-red-500">
+                {prescriptionToDelete?.kode_perawatan}
+              </span>{' '}
+              dengan Obat{' '}
+              <span className="font-bold text-red-500">
+                {prescriptionToDelete?.kode_obat}
+              </span>
+              ?
+            </p>
+            {/* Buttons */}
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="bg-gray-200 text-gray-700 py-2 px-5 rounded-lg hover:bg-gray-300 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="bg-red-500 text-white py-2 px-5 rounded-lg hover:bg-red-600 transition"
+              >
+                Confirm Deletion
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
