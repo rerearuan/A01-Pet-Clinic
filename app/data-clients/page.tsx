@@ -143,7 +143,9 @@ export default function ClientPage() {
                 <p className="font-bold text-gray-500 mb-1">
                   {selectedClient.type === 'Individu' ? 'Nama Lengkap' : 'Nama Perusahaan'}
                 </p>
-                <p className="text-gray-800">{selectedClient.name}</p>
+                <p className="text-gray-800">
+                  {selectedClient.type === 'Individu' ? selectedClient.name : (selectedClient as any).companyName}
+                </p>
               </div>
               <div>
                 <p className="font-bold text-gray-500 mb-1">Nomor Telepon</p>
