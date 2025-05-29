@@ -45,6 +45,7 @@ export default function ClientNavbar() {
             <NavLink href="/jenis-hewan" pathname={pathname} label="Kelola Hewan Peliharaan" />
             <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
             <NavLink href="/vaccines-client" pathname={pathname} label="Daftar Vaksinasi" />
+            <NavLink href="/detail-klien" pathname={pathname} label="Detail Data" />
             </div>
             
             {/* Logout Button */}
@@ -66,6 +67,7 @@ export default function ClientNavbar() {
             <NavLink href="/jenis-hewan" pathname={pathname} label="Kelola Hewan Peliharaan" />
             <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
             <NavLink href="/vaccines-client" pathname={pathname} label="Daftar Vaksinasi" />
+            <NavLink href="/detail-klien" pathname={pathname} label="Detail Data" />
             <Link
               href="/api/auth/signout"
               className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
