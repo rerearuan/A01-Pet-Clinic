@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import pool from '../../../lib/db/';
 
@@ -50,17 +49,9 @@ export async function POST(req: Request) {
     }
 
     try {
-      // Validasi email (case-insensitive)
-      const { rows } = await pool.query('SELECT * FROM "USER" WHERE LOWER(email) = LOWER($1)', [email]);
-      if (rows.length > 0) {
-        return NextResponse.json({ 
-          error: `Error: Email "${email}" sudah terdaftar, gunakan email lain.` 
-        }, { status: 400 });
-      }
-
       await pool.query('BEGIN');
 
-      // Insert ke USER
+      // Insert ke USER (trigger will handle email validation)
       await pool.query(
         'INSERT INTO "USER" (email, password, alamat, nomor_telepon) VALUES ($1, $2, $3, $4)',
         [email, password, alamat, nomor_telepon]
@@ -141,8 +132,12 @@ export async function POST(req: Request) {
 
       await pool.query('COMMIT');
       return NextResponse.json({ message: 'Pendaftaran berhasil!' }, { status: 201 });
-    } catch (error) {
+    } catch (error: any) {
       await pool.query('ROLLBACK');
+      // Check if the error is from the email trigger
+      if (error.message && error.message.includes('Email') && error.message.includes('sudah terdaftar')) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
+      }
       console.error('Database error:', error);
       return NextResponse.json({ error: 'Terjadi kesalahan server. Silakan coba lagi.' }, { status: 500 });
     }

@@ -41,7 +41,7 @@ export default function DoctorNavbar() {
 
           {/* Main Navigation */}
           <div className="hidden md:flex items-center space-x-8 h-10">
-            <NavLink href="/dashboards/DokterHewanDashboard" pathname={pathname} label="Dashboard" />
+            <NavLink href="/dashboard-user" pathname={pathname} label="Dashboard" />
             <NavLink href="/jenis-hewan" pathname={pathname} label="Jenis Hewan" />
             <NavLink href="/doctor/pet_treatments" pathname={pathname} label="Perawatan Hewan" />
             <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
@@ -75,10 +75,10 @@ export default function DoctorNavbar() {
           </div>
 
           {/* Logout Button */}
-          <div className="hidden md:flex items-center">
+        <div className="hidden md:flex items-center">
             <Link
-              href="/api/auth/signout"
-              className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              href="/logout"
+              className="px-5 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
             >
               Logout
             </Link>
@@ -88,7 +88,7 @@ export default function DoctorNavbar() {
 
       {isMobileMenuOpen && (
           <div className="md:hidden flex flex-col space-y-4 mt-4">
-            <NavLink href="/dashboards/DokterHewanDashboard" pathname={pathname} label="Dashboard" />
+            <NavLink href="/dashboard-user" pathname={pathname} label="Dashboard" />
             <NavLink href="/jenis-hewan" pathname={pathname} label="Jenis Hewan" />
             <NavLink href="/doctor/pet_treatments" pathname={pathname} label="Perawatan Hewan" />
             <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
@@ -105,8 +105,8 @@ export default function DoctorNavbar() {
               </div>
             </div>
             <Link
-              href="/api/auth/signout"
-              className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              href="/logout"
+              className="px-5 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
             >
               Logout
             </Link>

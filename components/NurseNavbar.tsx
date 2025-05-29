@@ -41,7 +41,7 @@ export default function NurseNavbar() {
 
           {/* Main Navigation */}
           <div className="hidden md:flex items-center space-x-8 h-10">
-            <NavLink href="" pathname={pathname} label="Dashboard" />
+            <NavLink href="/dashboard-user" pathname={pathname} label="Dashboard" />
             {/* Kelola Data Dropdown */}
             <div className="relative h-full flex items-center group">
               <Link
@@ -72,8 +72,8 @@ export default function NurseNavbar() {
           {/* Logout Button */}
           <div className="hidden md:flex items-center">
             <Link
-              href="/api/auth/signout"
-              className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              href="/logout"
+              className="px-5 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
             >
               Logout
             </Link>
@@ -83,7 +83,7 @@ export default function NurseNavbar() {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden flex flex-col space-y-4 mt-4">
-            <NavLink href="" pathname={pathname} label="Dashboard" />
+            <NavLink href="/dashboard-user" pathname={pathname} label="Dashboard" />
             <div className="flex flex-col space-y-2">
               <Link href="/doctor/manage" className={`flex items-center px-1 ${pathname.startsWith('/doctor/manage') ? activeClass : inactiveClass}`}>
                 Kelola Data
@@ -96,8 +96,8 @@ export default function NurseNavbar() {
               </div>
             </div>
             <Link
-              href="/api/auth/signout"
-              className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              href="/logout"
+              className="px-5 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
             >
               Logout
             </Link>
