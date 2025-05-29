@@ -497,7 +497,7 @@ export default function TreatmentManagement() {
                   <option value="">Jenis Perawatan</option>
                   {availableTreatments.map((treatment) => (
                     <option key={treatment.code} value={treatment.code}>
-                      {treatment.name} {/* Tampilkan nama, tapi value-nya adalah kode */}
+                      {treatment.code} - {treatment.name} {/* Tampilkan nama, tapi value-nya adalah kode */}
                     </option>
                   ))}
                 </select>
