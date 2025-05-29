@@ -41,7 +41,7 @@ export default function NurseNavbar() {
 
           {/* Main Navigation */}
           <div className="hidden md:flex items-center space-x-8 h-10">
-            <NavLink href="" pathname={pathname} label="Dashboard" />
+            <NavLink href="/dashboard-user" pathname={pathname} label="Dashboard" />
             {/* Kelola Data Dropdown */}
             <div className="relative h-full flex items-center group">
               <Link
@@ -61,9 +61,9 @@ export default function NurseNavbar() {
               {/* Dropdown Menu */}
               <div className="absolute top-full left-0 mt-0 w-56 bg-white rounded-b-md shadow-xl z-10 border-t-2 border-[#FD7E14] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                 <div className="py-2">
-                  <DropdownLink href="" label="Manajemen Obat" />
-                  <DropdownLink href="" label="Manajemen Jenis Perawatan" />
-                  <DropdownLink href="" label="Manajemen Vaksin" />
+                  <DropdownLink href="/medicine" label="Manajemen Obat" />
+                  <DropdownLink href="/treatment" label="Manajemen Jenis Perawatan" />
+                  <DropdownLink href="/vaksin-stok" label="Manajemen Vaksin" />
                 </div>
               </div>
             </div>
@@ -73,7 +73,7 @@ export default function NurseNavbar() {
           <div className="hidden md:flex items-center">
             <Link
               href="/logout"
-              className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              className="px-5 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
             >
               Logout
             </Link>
@@ -83,21 +83,21 @@ export default function NurseNavbar() {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden flex flex-col space-y-4 mt-4">
-            <NavLink href="" pathname={pathname} label="Dashboard" />
+            <NavLink href="/dashboard-user" pathname={pathname} label="Dashboard" />
             <div className="flex flex-col space-y-2">
               <Link href="/doctor/manage" className={`flex items-center px-1 ${pathname.startsWith('/doctor/manage') ? activeClass : inactiveClass}`}>
                 Kelola Data
               </Link>
               {/* Dropdown Menu expanded di mobile */}
               <div className="flex flex-col pl-4">
-                <DropdownLink href="" label="Manajemen Obat" />
-                <DropdownLink href="" label="Manajemen Jenis Perawatan" />
-                <DropdownLink href="" label="Manajemen Vaksin" />
+                <DropdownLink href="/medicine" label="Manajemen Obat" />
+                <DropdownLink href="/treatment" label="Manajemen Jenis Perawatan" />
+                <DropdownLink href="/vaksin-stok" label="Manajemen Vaksin" />
               </div>
             </div>
             <Link
               href="/logout"
-              className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              className="px-5 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
             >
               Logout
             </Link>

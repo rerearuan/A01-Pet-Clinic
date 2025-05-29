@@ -1,21 +1,91 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { PlusIcon } from '../../../components/Icons';
+import Select from 'react-select';
+import { useSession } from 'next-auth/react';
 
 export default function CreatePet() {
+  const { data: session, status } = useSession();
+  const role = session?.user?.role;
+
   const [pemilik, setPemilik] = useState('');
   const [jenis, setJenis] = useState('');
   const [nama, setNama] = useState('');
   const [tanggal, setTanggal] = useState('');
   const [url, setUrl] = useState('');
+  const [owners, setOwners] = useState<{ id: string; label: string }[]>([]);
+  const [jenisList, setJenisList] = useState<{ id: string; label: string }[]>([]);
   const router = useRouter();
 
-  const handleCreate = () => {
-    // TODO: POST to /api/hewan-peliharaan
-    router.push('/hewan-peliharaan');
+  useEffect(() => {
+    if (status === 'authenticated') {
+      const fetchOptions = async () => {
+        try {
+          const [resKlien, resJenis] = await Promise.all([
+            fetch('/api/client'),
+            fetch('/api/jenis-hewan'),
+          ]);
+
+          if (resKlien.ok) {
+            const klienData = await resKlien.json();
+            setOwners(klienData.map((k: any) => ({
+              id: k.no_identitas,
+              label: `${k.nama} (${k.no_identitas.slice(0, 8)}...)`
+            })));
+          }
+
+          if (resJenis.ok) {
+            const jenisData = await resJenis.json();
+            setJenisList(jenisData.map((j: any) => ({
+              id: j.id,
+              label: j.nama_jenis
+            })));
+          }
+        } catch (err) {
+          console.error('Error fetching dropdown options:', err);
+        }
+      };
+
+      fetchOptions();
+    }
+  }, [status]);
+
+  if (status === 'loading') {
+    return <div className="min-h-screen flex items-center justify-center">Loading…</div>;
+  }
+
+  if (role !== 'front-desk' && role !== 'individu' && role !== 'perusahaan') {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500 font-semibold">
+        Forbidden: You do not have access to create a pet.
+      </div>
+    );
+  }
+
+  const handleCreate = async () => {
+    try {
+      const body = {
+        nama,
+        no_identitas_klien: pemilik,
+        id_jenis: jenis,
+        tanggal_lahir: tanggal,
+        url_foto: url,
+      };
+
+      const res = await fetch('/api/hewan-peliharaan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) throw new Error('Failed to create pet');
+
+      router.push('/hewan-peliharaan');
+    } catch (err) {
+      console.error('Create pet error:', err);
+    }
   };
 
   return (
@@ -28,22 +98,26 @@ export default function CreatePet() {
         <div className="space-y-4">
           <div>
             <label className="block text-gray-700 font-semibold mb-1">Pemilik</label>
-            <input
-              type="text"
-              value={pemilik}
-              onChange={e => setPemilik(e.target.value)}
-              placeholder="Nama Pemilik"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-orange-300 focus:border-orange-300"
+            <Select
+              value={owners.find(o => o.id === pemilik) || null}
+              onChange={(option) => setPemilik(option?.id || '')}
+              options={owners}
+              getOptionLabel={(o) => o.label}
+              getOptionValue={(o) => o.id}
+              placeholder="Pilih Pemilik"
+              isSearchable
             />
           </div>
           <div>
             <label className="block text-gray-700 font-semibold mb-1">Jenis Hewan</label>
-            <input
-              type="text"
-              value={jenis}
-              onChange={e => setJenis(e.target.value)}
-              placeholder="Jenis Hewan"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-orange-300 focus:border-orange-300"
+            <Select
+              value={jenisList.find(j => j.id === jenis) || null}
+              onChange={(option) => setJenis(option?.id || '')}
+              options={jenisList}
+              getOptionLabel={(j) => j.label}
+              getOptionValue={(j) => j.id}
+              placeholder="Pilih Jenis Hewan"
+              isSearchable
             />
           </div>
           <div>
@@ -53,7 +127,7 @@ export default function CreatePet() {
               value={nama}
               onChange={e => setNama(e.target.value)}
               placeholder="Nama Hewan"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-orange-300 focus:border-orange-300"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2"
             />
           </div>
           <div>
@@ -62,7 +136,7 @@ export default function CreatePet() {
               type="date"
               value={tanggal}
               onChange={e => setTanggal(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-orange-300 focus:border-orange-300"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2"
             />
           </div>
           <div>
@@ -72,7 +146,7 @@ export default function CreatePet() {
               value={url}
               onChange={e => setUrl(e.target.value)}
               placeholder="https://"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-orange-300 focus:border-orange-300"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2"
             />
           </div>
         </div>

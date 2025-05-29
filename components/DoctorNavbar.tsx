@@ -41,8 +41,8 @@ export default function DoctorNavbar() {
 
           {/* Main Navigation */}
           <div className="hidden md:flex items-center space-x-8 h-10">
-            <NavLink href="/doctor" pathname={pathname} label="Dashboard" />
-            <NavLink href="/doctor/pet-types" pathname={pathname} label="Jenis Hewan" />
+            <NavLink href="/dashboard-user" pathname={pathname} label="Dashboard" />
+            <NavLink href="/jenis-hewan" pathname={pathname} label="Jenis Hewan" />
             <NavLink href="/doctor/pet_treatments" pathname={pathname} label="Perawatan Hewan" />
             <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
             
@@ -65,20 +65,20 @@ export default function DoctorNavbar() {
               {/* Dropdown Menu */}
               <div className="absolute top-full left-0 mt-0 w-56 bg-white rounded-b-md shadow-xl z-10 border-t-2 border-[#FD7E14] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                 <div className="py-2">
-                  <DropdownLink href="/doctor/manage/medicines" label="Manajemen Obat" />
-                  <DropdownLink href="/doctor/manage/treatment-types" label="Manajemen Jenis Perawatan" />
-                  <DropdownLink href="/doctor/manage/medication" label="Manajemen Pemberian Obat" />
-                  <DropdownLink href="/doctor/manage/vaccinations" label="Manajemen Vaksinasi Hewan" />
+                  <DropdownLink href="/medicine" label="Manajemen Obat" />
+                  <DropdownLink href="/treatment" label="Manajemen Jenis Perawatan" />
+                  <DropdownLink href="/prescription" label="Manajemen Pemberian Obat" />
+                  <DropdownLink href="/vaksin" label="Manajemen Vaksinasi Hewan" />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Logout Button */}
-          <div className="hidden md:flex items-center">
+        <div className="hidden md:flex items-center">
             <Link
               href="/logout"
-              className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              className="px-5 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
             >
               Logout
             </Link>
@@ -88,8 +88,8 @@ export default function DoctorNavbar() {
 
       {isMobileMenuOpen && (
           <div className="md:hidden flex flex-col space-y-4 mt-4">
-            <NavLink href="/doctor" pathname={pathname} label="Dashboard" />
-            <NavLink href="/doctor/pet-types" pathname={pathname} label="Jenis Hewan" />
+            <NavLink href="/dashboard-user" pathname={pathname} label="Dashboard" />
+            <NavLink href="/jenis-hewan" pathname={pathname} label="Jenis Hewan" />
             <NavLink href="/doctor/pet_treatments" pathname={pathname} label="Perawatan Hewan" />
             <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
             <div className="flex flex-col space-y-2">
@@ -98,15 +98,15 @@ export default function DoctorNavbar() {
               </Link>
               {/* Dropdown Menu expanded di mobile */}
               <div className="flex flex-col pl-4">
-                  <DropdownLink href="/doctor/manage/medicines" label="Manajemen Obat" />
-                  <DropdownLink href="/doctor/manage/treatment-types" label="Manajemen Jenis Perawatan" />
-                  <DropdownLink href="/doctor/manage/medication" label="Manajemen Pemberian Obat" />
-                  <DropdownLink href="/doctor/manage/vaccinations" label="Manajemen Vaksinasi Hewan" />
+                  <DropdownLink href="/medicine" label="Manajemen Obat" />
+                  <DropdownLink href="/treatment" label="Manajemen Jenis Perawatan" />
+                  <DropdownLink href="/prescription" label="Manajemen Pemberian Obat" />
+                  <DropdownLink href="/vaksin" label="Manajemen Vaksinasi Hewan" />
               </div>
             </div>
             <Link
               href="/logout"
-              className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              className="px-5 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
             >
               Logout
             </Link>

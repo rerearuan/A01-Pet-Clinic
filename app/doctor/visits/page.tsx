@@ -1,234 +1,626 @@
 "use client";
 
-import { useState } from 'react';
+import { useSession } from "next-auth/react";
+import { useState, useEffect } from 'react';
 import { FaPlus, FaFileMedical, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
-import { useRouter } from 'next/navigation';
 import RekamMedisModal from './components/RekamMedisModal';
+import { ErrorDisplay } from "./components/ErrorDisplay";
 
-type Kunjungan = {
+type VisitType = 'Walk-In' | 'Janji Temu' | 'Darurat';
+export type StaffRole = 'front_desk' | 'dokter_hewan' | 'perawat_hewan';
+
+interface Kunjungan {
   id: string;
   clientId: string;
   petName: string;
   petType: string;
-  visitType: 'Walk-In' | 'Janji Temu' | 'Darurat';
+  visitType: VisitType;
   startTime: string;
-  endTime: string;
-};
+  endTime?: string;
+  frontDeskId: string;
+  nurseId: string;
+  doctorId: string;
+}
 
-type RekamMedis = {
-  suhuTubuh: string;
-  beratBadan: string;
-  jenisPerawatan: string;
-  catatan: string;
-  waktuPerawatan: string;
-};
+export interface RekamMedis {
+  bodyTemperature: number | null;
+  bodyWeight: number | null;
+  catatan: string | null;
+}
+
+export interface StaffMember {
+  id: string;
+  email_user: string;
+  role: StaffRole;
+}
+
+export interface Klien {
+  no_identitas: string;
+  email: string;
+  tanggal_registrasi: string;
+}
+
+interface Hewan {
+  nama: string;
+  no_identitas_klien: string;
+  tanggal_lahir: string;
+  id_jenis: string;
+  url_foto: string;
+}
+
+interface AppState {
+  visits: Kunjungan[];
+  medicalRecords: Record<string, RekamMedis>;
+  userEmails: StaffMember[];
+  klienList: Klien[];
+  hewanList: Hewan[];
+  loading: boolean;
+  loadingUsers: boolean;
+  isLoadingMedicalRecord: boolean;
+  error: string | null;
+}
+
 
 export default function VisitPage() {
-  const router = useRouter();
+  const { data: session, status } = useSession();
+  const userRole = session?.user?.role;
   
-  // State for visits data
-  const [visits, setVisits] = useState<Kunjungan[]>([
-    {
-      id: 'KJ-2023-001',
-      clientId: 'CL-00123',
-      petName: 'Max',
-      petType: 'Kucing',
-      visitType: 'Janji Temu',
-      startTime: '2023-05-15T10:00:00',
-      endTime: '2023-05-15T11:30:00',
-    },
-    {
-      id: 'KJ-2023-002',
-      clientId: 'CL-00456',
-      petName: 'Bella',
-      petType: 'Anjing',
-      visitType: 'Walk-In',
-      startTime: '2023-05-16T14:00:00',
-      endTime: '2023-05-16T15:15:00',
-    },
-  ]);
-
-  // State for medical records
-  const [medicalRecords, setMedicalRecords] = useState<Record<string, RekamMedis>>({
-    'KJ-2023-001': {
-      suhuTubuh: '38',
-      beratBadan: '12.3',
-      jenisPerawatan: 'Vaksinasi',
-      catatan: 'Lorem Ipsum Dolor Sir Ahjirfbgfbjbnjvbnkg bhjbbjhj',
-      waktuPerawatan: '2023-05-15T10:30:00',
-    }
+  // State management
+  const [state, setState] = useState<AppState>({
+    visits: [],
+    medicalRecords: {},
+    userEmails: [],
+    klienList: [],
+    hewanList: [],
+    loading: true,
+    loadingUsers: false,
+    isLoadingMedicalRecord: false,
+    error: null
   });
 
-  // Modal states
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [showMedicalRecordModal, setShowMedicalRecordModal] = useState(false);
-  const [currentKunjungan, setCurrentKunjungan] = useState<Kunjungan | null>(null);
-  const [kunjunganToDelete, setKunjunganToDelete] = useState('');
-  const [currentVisitId, setCurrentVisitId] = useState('');
+  const [modals, setModals] = useState({
+    showCreate: false,
+    showUpdate: false,
+    showDelete: false,
+    showMedicalRecord: false
+  });
 
-  // Form state
-  const [formData, setFormData] = useState<Omit<Kunjungan, 'id' | 'petType'>>({
+  const [form, setForm] = useState<Omit<Kunjungan, 'id' | 'petType'>>({
     clientId: '',
     petName: '',
     visitType: 'Walk-In',
     startTime: '',
     endTime: '',
+    frontDeskId: '',
+    nurseId: '',
+    doctorId: ''
   });
 
-  const formatDateTime = (isoString: string) => {
-    const date = new Date(isoString);
-    return date.toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  const [currentVisit, setCurrentVisit] = useState({
+    kunjungan: null as Kunjungan | null,
+    idToDelete: '',
+    currentVisitId: ''
+  });
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  const visitTypeOptions: VisitType[] = ['Walk-In', 'Janji Temu', 'Darurat'];
 
-  const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newKunjungan: Kunjungan = {
-      ...formData,
-      id: `KJ-${new Date().getFullYear()}-${(visits.length + 1).toString().padStart(3, '0')}`,
-      petType: formData.petName === 'Max' ? 'Kucing' : 'Anjing'
+  // Data Fetching
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        setState(prev => ({ ...prev, loading: true }));
+        
+        const [visitsResponse, staffResponse, klienResponse, hewanResponse] = await Promise.all([
+          fetch('/api/visits/get-or-post-visit'),
+          fetch('/api/visits/get_staff'),
+          fetch('/api/visits/get-client'),
+          fetch('/api/visits/get-pet')
+        ]);
+
+        if (!visitsResponse.ok || !staffResponse.ok || !klienResponse.ok || !hewanResponse.ok) {
+          throw new Error('Failed to fetch initial data');
+        }
+
+        const [visitsData, staffData, klienData, hewanData] = await Promise.all([
+          visitsResponse.json(),
+          staffResponse.json(),
+          klienResponse.json(),
+          hewanResponse.json()
+        ]);
+
+        setState(prev => ({
+          ...prev,
+          visits: visitsData.data,
+          userEmails: staffData.data,
+          klienList: klienData.data,
+          hewanList: hewanData.data,
+          loading: false
+        }));
+      } catch (error) {
+        setState(prev => ({
+          ...prev,
+          error: error instanceof Error ? error.message : 'Unknown error',
+          loading: false
+        }));
+      }
     };
-    setVisits([...visits, newKunjungan]);
-    setShowCreateModal(false);
-    resetForm();
-  };
 
-  const prepareUpdate = (kunjungan: Kunjungan) => {
-    setCurrentKunjungan(kunjungan);
-    setFormData({
-      clientId: kunjungan.clientId,
-      petName: kunjungan.petName,
-      visitType: kunjungan.visitType,
-      startTime: kunjungan.startTime,
-      endTime: kunjungan.endTime,
-    });
-    setShowUpdateModal(true);
-  };
+    fetchInitialData();
+  }, []);
 
-  const handleUpdate = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentKunjungan) return;
-    
-    const updatedVisits = visits.map(v => 
-      v.id === currentKunjungan.id ? { ...v, ...formData } : v
-    );
-    setVisits(updatedVisits);
-    setShowUpdateModal(false);
-    resetForm();
-  };
+  const [error, setError] = useState<string | null>(null);
 
-  const prepareDelete = (id: string) => {
-    setKunjunganToDelete(id);
-    setShowDeleteModal(true);
-  };
-
-  const handleDelete = () => {
-    setVisits(visits.filter(v => v.id !== kunjunganToDelete));
-    setShowDeleteModal(false);
-  };
-
-  const handleShowMedicalRecord = (visitId: string) => {
-    setCurrentVisitId(visitId);
-    setShowMedicalRecordModal(true);
-  };
-
-  const handleSaveMedicalRecord = (data: RekamMedis) => {
-    setMedicalRecords(prev => ({
-      ...prev,
-      [currentVisitId]: data
+  const getClientOptions = () => {
+    return state.klienList.map((klien: Klien) => ({
+      value: klien.no_identitas,
+      label: `${klien.no_identitas}`
     }));
-    setShowMedicalRecordModal(false);
   };
+
+  const get_id_klien = (email: string | null | undefined, state: AppState): string | null => {
+    if (!email) return null;  // Handle null/undefined case
+    if (!state.klienList) return null;
+    const client = state.klienList.find(klien => klien.email === email);
+    return client ? client.no_identitas : null;
+  };
+
+  const get_id_pegawai = (email: string | null | undefined, state: AppState): string | null => {
+    if (!email) return null;  // Handle null/undefined case
+    if (!state.userEmails) return null;
+    const staff = state.userEmails.find(member => member.email_user === email);
+    return staff ? staff.id : null;
+  };
+
+// Usage
+  const id_user = get_id_klien(session?.user.email, state) || get_id_pegawai(session?.user.email, state);
+
+  const getPetOptions = (clientId: string) => {
+    if (!clientId) return [];
+    
+    return state.hewanList
+      .filter((hewan: Hewan) => hewan.no_identitas_klien === clientId)
+      .map((hewan: Hewan) => ({
+        value: hewan.nama,
+        label: hewan.nama
+      }));
+  };
+
+  const fetchMedicalRecord = async (visitId: string, detail: {
+    nama_hewan: string;
+    no_identitas_klien: string;
+    no_front_desk: string;
+    no_perawat_hewan: string;
+    no_dokter_hewan: string;
+  }) => {
+    try {
+      setState(prev => ({ ...prev, isLoadingMedicalRecord: true }));
+
+      const res = await fetch(`/api/visits/${visitId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(detail)
+      });
+
+      const data = await res.json();
+      
+      if (data.success) {
+        setState(prev => ({
+          ...prev,
+          medicalRecords: {
+            ...prev.medicalRecords,
+            [visitId]: data.data
+          }
+        }));
+      }
+      return data.data;
+    } catch (error) {
+      console.error("Failed to fetch medical record:", error);
+      return null;
+    } finally {
+      setState(prev => ({ ...prev, isLoadingMedicalRecord: false }));
+    }
+  };
+
+  // Event Handlers
+  const handleFormChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  try {
+    const payload = {
+      clientId: form.clientId,
+      petName: form.petName,
+      visitType: form.visitType,
+      startTime: new Date(form.startTime).toISOString(),
+      endTime: form.endTime ? new Date(form.endTime).toISOString() : null,
+      frontDeskId: form.frontDeskId,
+      nurseId: form.nurseId,
+      doctorId: form.doctorId
+    };
+
+    const response = await fetch('/api/visits/get-or-post-visit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+    
+    if (data.success) {
+      setState(prev => ({
+        ...prev,
+        visits: [...prev.visits, {
+          ...data.data,
+        }]
+      }));
+      
+      closeModal('create');
+      resetForm();
+      setError(null);
+      // update state lain dan tutup modal
+    } else {
+      // langsung set error biar muncul
+      setError(data.message || 'Terjadi kesalahan');
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : 'Terjadi kesalahan saat memproses permintaan';
+    
+    setState(prev => ({ ...prev, error: errorMessage }));
+  }
+};
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentVisit.kunjungan) return;
+    
+    try {
+      // Format payload dengan DateTime yang benar
+      const payload = {
+        id: currentVisit.kunjungan.id,
+        clientId: form.clientId,
+        petName: form.petName,
+        visitType: form.visitType,
+        startTime: new Date(form.startTime).toISOString(),
+        endTime: form.endTime ? new Date(form.endTime).toISOString() : null,
+        frontDeskId: form.frontDeskId,
+        nurseId: form.nurseId,
+        doctorId: form.doctorId
+      };
+
+      const response = await fetch('/api/visits/get-or-post-visit', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      
+      // Update state dengan data terbaru
+      if(data.success){
+      const updatedVisits = state.visits.map(v => 
+        v.id === currentVisit.kunjungan?.id ? { 
+          ...v,
+          ...form,
+          startTime: data.data.startTime || data.data.timestamp_awal,
+          endTime: data.data.endTime || data.data.timestamp_akhir
+        } : v
+      );
+      
+      setState(prev => ({ ...prev, visits: updatedVisits }));
+      closeModal('update');
+      resetForm();
+      setError(null);
+    } else {
+        console.log("error:", data.message)
+        setError(data.message);
+
+    }
+      } catch (error) {
+        const errorMessage = error instanceof Error 
+          ? error.message 
+          : 'Terjadi kesalahan saat memproses permintaan';
+        
+        setState(prev => ({ ...prev, error: errorMessage }));
+      }
+    };
+
+  const handleDelete = async () => {
+  if (!currentVisit.idToDelete) return;
+
+  try {
+    const response = await fetch(`/api/visits/delete/${currentVisit.idToDelete}`, {
+      method: 'DELETE'
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.message || 'Failed to delete visit');
+    }
+
+    // Update state setelah delete berhasil
+    setState(prev => ({
+      ...prev,
+      visits: prev.visits.filter(v => v.id !== currentVisit.idToDelete)
+    }));
+
+    closeModal('delete');
+  } catch (error) {
+    console.error("Delete error:", error);
+    setState(prev => ({
+      ...prev,
+      error: error instanceof Error ? error.message : 'Failed to delete visit'
+    }));
+  }
+};
+
+  const handleShowMedicalRecord = async (kunjungan: Kunjungan) => {
+    setCurrentVisit(prev => ({ ...prev, kunjungan }));
+    
+    await fetchMedicalRecord(kunjungan.id, {
+      nama_hewan: kunjungan.petName,
+      no_identitas_klien: kunjungan.clientId,
+      no_front_desk: kunjungan.frontDeskId,
+      no_perawat_hewan: kunjungan.nurseId,
+      no_dokter_hewan: kunjungan.doctorId
+    });
+
+    setModals(prev => ({ ...prev, showMedicalRecord: true }));
+    setCurrentVisit(prev => ({ ...prev, currentVisitId: kunjungan.id }));
+  };
+
+  // Helper functions untuk format tanggal/waktu
+const formatDateTime = (dateString: string) => {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'Invalid Date';
+  
+  return date.toLocaleString('id-ID', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+const formatDateTimeForInput = (dateString: string) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
+  
+  // Kompensasi timezone offset
+  const offset = date.getTimezoneOffset() * 60000;
+  const localISOTime = new Date(date.getTime() - offset).toISOString();
+  return localISOTime.slice(0, 16);
+};
 
   const resetForm = () => {
-    setFormData({
+    setForm({
       clientId: '',
       petName: '',
       visitType: 'Walk-In',
       startTime: '',
       endTime: '',
+      frontDeskId: '',
+      nurseId: '',
+      doctorId: ''
     });
   };
 
-  const KunjunganModal = ({ isCreate }: { isCreate: boolean }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+  const openModal = (type: 'create' | 'update' | 'delete', kunjungan?: Kunjungan) => {
+  if (type === 'create') {
+    resetForm();
+    } else if (type === 'update' && kunjungan) {
+      setCurrentVisit(prev => ({ ...prev, kunjungan }));
+      setForm({
+        clientId: kunjungan.clientId,
+        petName: kunjungan.petName,
+        visitType: kunjungan.visitType,
+        startTime: formatDateTimeForInput(kunjungan.startTime), // Gunakan formatter
+        endTime: kunjungan.endTime ? formatDateTimeForInput(kunjungan.endTime) : "",
+        frontDeskId: kunjungan.frontDeskId,
+        nurseId: kunjungan.nurseId,
+        doctorId: kunjungan.doctorId
+      });
+    } else if (type === 'delete' && kunjungan) {
+         setCurrentVisit(prev => ({ 
+          ...prev, 
+          idToDelete: kunjungan.id,
+          kunjungan
+        }));
+          }
+    
+    setModals(prev => ({ ...prev, [`show${type.charAt(0).toUpperCase() + type.slice(1)}`]: true }));
+  };
+
+  const closeModal = (type: 'create' | 'update' | 'delete' | 'medicalRecord') => {
+    setModals(prev => ({ ...prev, [`show${type.charAt(0).toUpperCase() + type.slice(1)}`]: false }));
+  };
+
+  const getStaffByRole = (role: StaffRole) => {
+    return state.userEmails.filter(user => user.role === role);
+  };
+
+  const StaffSelect = ({ role, value, onChange }: {
+    role: StaffRole;
+    value: string;
+    disable:boolean;
+    onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  }) => {
+    const { data: session } = useSession();
+    
+    // Only run once when component mounts
+    useEffect(() => {
+      if (role === 'front_desk' && 
+          session?.user.role === 'front-desk' && 
+          value !== id_user) {
+        onChange({
+          target: {
+            name: 'frontDeskId',
+            value: id_user || ''
+          }
+        } as React.ChangeEvent<HTMLSelectElement>);
+      }
+  }, [role, session?.user.role, id_user]);
+
+    const isCurrentUserField = role === 'front_desk' && session?.user.role === 'front-desk';
+    const staffOptions = getStaffByRole(role);
+
+    return (
+      <div className="mb-4">
+        <label htmlFor={`${role}-select`} className="block text-sm font-medium text-gray-700 mb-1">
+          {role === 'front_desk' ? 'Front Desk' : role === 'dokter_hewan' ? 'Dokter' : 'Perawat'}
+        </label>
+        
+        {isCurrentUserField ? (
+          // Display as read-only field for current front-desk user
+          <div className="p-2 bg-gray-100 rounded-md">
+            {session.user.email} (Current User)
+            <input 
+              type="hidden" 
+              name="frontDeskId" 
+              value={id_user || ''} 
+            />
+          </div>
+        ) : (
+          // Regular select dropdown for other cases
+          <select
+            id={`${role}-select`}
+            name={role === 'front_desk' ? 'frontDeskId' : 
+                  role === 'dokter_hewan' ? 'doctorId' : 'nurseId'}
+            value={isCurrentUserField ? id_user || '' : value}
+            onChange={onChange}
+            className="w-full p-2 border border-gray-300 rounded-md"
+            required
+          >
+            <option value="">
+              {state.loadingUsers ? 'Memuat...' : `Pilih ${role === 'front_desk' ? 'Front Desk' : role === 'dokter_hewan' ? 'Dokter' : 'Perawat'}`}
+            </option>
+            {staffOptions.map(user => (
+              <option key={user.id} value={user.id}>
+                {user.email_user}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+    );
+  };
+
+
+  const VisitModal = ({ isCreate }: { isCreate: boolean }) => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 overflow-y-auto py-10">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md my-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">
             {isCreate ? 'Buat Kunjungan Baru' : 'Edit Kunjungan'}
           </h2>
           <button 
-            onClick={() => isCreate ? setShowCreateModal(false) : setShowUpdateModal(false)} 
+            onClick={() => closeModal(isCreate ? 'create' : 'update')}
             className="text-gray-500 hover:text-gray-700"
           >
             <FaTimes />
           </button>
         </div>
 
+         {error &&  (
+            <ErrorDisplay
+              error={error}
+              onClose={() => setError(null)}
+            />
+          )}
+
         <form onSubmit={isCreate ? handleCreate : handleUpdate}>
+          {/* Client ID */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">ID Klien</label>
+            <label htmlFor="clientId" className="block text-sm font-medium text-gray-700 mb-1">
+              ID Klien
+            </label>
             <select
+              id="clientId"
               name="clientId"
-              value={formData.clientId}
-              onChange={handleFormChange}
+              value={form.clientId}
+              onChange={(e) => {
+                handleFormChange(e);
+                setForm(prev => ({ ...prev, petName: '' }));
+              }}
               className="w-full p-2 border border-gray-300 rounded-md"
               required
             >
-              <option value="">Pilih ID Klien</option>
-              <option value="CL-00123">CL-00123</option>
-              <option value="CL-00456">CL-00456</option>
+              <option value="">Pilih Klien</option>
+              {getClientOptions().map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </div>
 
+          {/* Pet Name */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nama Hewan</label>
+            <label htmlFor="petName" className="block text-sm font-medium text-gray-700 mb-1">
+              Nama Hewan
+            </label>
             <select
+              id="petName"
               name="petName"
-              value={formData.petName}
+              value={form.petName}
               onChange={handleFormChange}
               className="w-full p-2 border border-gray-300 rounded-md"
               required
+              disabled={!form.clientId}
             >
-              <option value="">Pilih Nama Hewan</option>
-              <option value="Max">Max</option>
-              <option value="Bella">Bella</option>
+              <option value="">Pilih Hewan</option>
+              {form.clientId && getPetOptions(form.clientId).map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </div>
 
+          {/* Visit Type */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tipe Kunjungan</label>
+            <label htmlFor="visitType" className="block text-sm font-medium text-gray-700 mb-1">
+              Tipe Kunjungan
+            </label>
             <select
+              id="visitType"
               name="visitType"
-              value={formData.visitType}
+              value={form.visitType}
               onChange={handleFormChange}
               className="w-full p-2 border border-gray-300 rounded-md"
               required
             >
-              <option value="Walk-In">Walk-In</option>
-              <option value="Janji Temu">Janji Temu</option>
-              <option value="Darurat">Darurat</option>
+              {visitTypeOptions.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
             </select>
           </div>
 
+          {/* Staff Selection */}
+          <StaffSelect role="front_desk" value={form.frontDeskId} onChange={handleFormChange} disable={userRole === 'front-desk'}/>
+          <StaffSelect role="perawat_hewan" value={form.nurseId} onChange={handleFormChange} disable={false} />
+          <StaffSelect role="dokter_hewan" value={form.doctorId} onChange={handleFormChange} disable={false} />
+          
+
+          {/* Time Selection */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Waktu Mulai</label>
+            <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-1">
+              Waktu Mulai
+            </label>
             <input
+              id="startTime"
               type="datetime-local"
               name="startTime"
-              value={formData.startTime}
+              value={formatDateTimeForInput(form.startTime)}
               onChange={handleFormChange}
               className="w-full p-2 border border-gray-300 rounded-md"
               required
@@ -236,21 +628,23 @@ export default function VisitPage() {
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Waktu Selesai</label>
+            <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-1">
+              Waktu Selesai
+            </label>
             <input
+              id="endTime"
               type="datetime-local"
               name="endTime"
-              value={formData.endTime}
+              value={form.endTime ? formatDateTimeForInput(form.endTime) : ""}
               onChange={handleFormChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
             />
           </div>
 
           <div className="flex justify-end space-x-3">
             <button
               type="button"
-              onClick={() => isCreate ? setShowCreateModal(false) : setShowUpdateModal(false)}
+              onClick={() => closeModal(isCreate ? 'create' : 'update')}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100"
             >
               Batal
@@ -272,19 +666,22 @@ export default function VisitPage() {
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Hapus Kunjungan</h2>
-          <button onClick={() => setShowDeleteModal(false)} className="text-gray-500 hover:text-gray-700">
+          <button 
+            onClick={() => closeModal('delete')}
+            className="text-gray-500 hover:text-gray-700"
+          >
             <FaTimes />
           </button>
         </div>
 
         <div className="mb-6">
-          <p>Apakah kamu yakin untuk menghapus</p>
-          <p className="font-semibold">KUNJUNGAN dengan ID {kunjunganToDelete}?</p>
+          <p>Apakah kamu yakin untuk menghapus kunjungan ini?</p>
+          <p className="font-semibold mt-2">ID: {currentVisit.idToDelete}</p>
         </div>
 
         <div className="flex justify-end space-x-3">
           <button
-            onClick={() => setShowDeleteModal(false)}
+            onClick={() => closeModal('delete')}
             className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100"
           >
             Batal
@@ -292,8 +689,9 @@ export default function VisitPage() {
           <button
             onClick={handleDelete}
             className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            disabled={state.loading}
           >
-            Hapus
+            {state.loading ? 'Menghapus...' : 'Hapus'}
           </button>
         </div>
       </div>
@@ -301,99 +699,147 @@ export default function VisitPage() {
   );
 
   return (
-    <div
-    className="min-h-screen bg-cover bg-center px-4 py-10"
-    // style={{ backgroundImage: "url('/background.png')" }}
-  >
-    <div className="bg-white bg-opacity-90 rounded-lg p-6 shadow-md">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">List Kunjungan</h1>
-      </div>
+    <div className="min-h-screen bg-cover bg-center px-4 py-10">
+      <div className="bg-white bg-opacity-90 rounded-lg p-6 shadow-md">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">List Kunjungan</h1>
+          {userRole==='front-desk' && <button
+            onClick={() => openModal('create')}
+            className="bg-[#FD7E14] hover:bg-[#E67112] text-white px-4 py-2 rounded-md"
+          >
+            + Buat Kunjungan Baru
+          </button>}
+        </div>
 
-      <div className="mb-4 flex justify-end">
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="bg-[#FD7E14] hover:bg-[#E67112] text-white px-4 py-2 rounded-md"
-        >
-          + Buat Kunjungan Baru
-        </button>
-      </div>
+        {state.loading ? (
+          <div className="flex justify-center items-center h-64">
+            <p>Memuat data...</p>
+          </div>
+        ) : state.error ? (
+          <div className="text-red-500 p-4">{state.error}</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full border border-gray-200">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID Kunjungan</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID Klien</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Hewan</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipe</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Waktu Mulai</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Waktu Selesai</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rekam Medis</th>
+                  {userRole === "front-desk" && <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {state.visits.filter(visit => {
+                    if (userRole === "front-desk") return true;
+                    
+                    // Jika doctor, tampilkan hanya kunjungan yang ditangani doctor ini
+                    if (userRole === "dokter-hewan") return visit.doctorId === id_user;
 
+                    if (userRole === "perawat-hewan") return visit.nurseId === id_user;
+                    
+                    // Jika client, tampilkan hanya kunjungan milik client ini
+                    if (userRole === "individu" || userRole === "perusahaan" ) return visit.clientId === id_user;
+                    
+                    return false;
+                  }).sort((a, b) => {
+                    // Convert dates to a comparable format (e.g., milliseconds since epoch)
+                    const dateA = a.endTime ? new Date(a.endTime).getTime() : new Date(a.startTime).getTime();
+                    const dateB = b.endTime ? new Date(b.endTime).getTime() : new Date(b.startTime).getTime();
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-200">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID Kunjungan</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID Klien</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Hewan</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipe</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Waktu Mulai</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Waktu Selesai</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rekam Medis</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {visits.map((visit) => (
-              <tr key={visit.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3 whitespace-nowrap text-sm">{visit.id}</td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm">{visit.clientId}</td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm">
-                  {visit.petName} ({visit.petType})
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    visit.visitType === 'Walk-In' ? 'bg-blue-100 text-blue-800' : 
-                    visit.visitType === 'Janji Temu' ? 'bg-green-100 text-green-800' : 
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {visit.visitType}
-                  </span>
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm">{formatDateTime(visit.startTime)}</td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm">{formatDateTime(visit.endTime)}</td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm">
-                  <button 
-                    onClick={() => handleShowMedicalRecord(visit.id)}
-                    className="text-blue-600 hover:text-blue-800 inline-flex items-center"
-                  >
-                    <FaFileMedical className="mr-1" />
-                    Rekam
-                  </button>
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm space-x-2">
-                  <button 
-                    onClick={() => prepareUpdate(visit)}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    <FaEdit />
-                  </button>
-                  <button 
-                    onClick={() => prepareDelete(visit.id)}
-                    className="text-red-600 hover:text-red-800"
-                  >
-                    <FaTrash />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                    // Handle null/undefined end dates:
+                    // If both have endTime, sort by endTime
+                    // If one has endTime and the other doesn't, the one with endTime comes first (unless we want nulls last)
+                    // If neither has endTime, sort by startDate
 
-      {showCreateModal && <KunjunganModal isCreate={true} />}
-      {showUpdateModal && <KunjunganModal isCreate={false} />}
-      {showDeleteModal && <DeleteModal />}
-      {showMedicalRecordModal && (
+                    // For sorting with nulls last:
+                    // If a.endTime is null and b.endTime is not null, b comes first (-1)
+                    if (a.endTime === null && b.endTime !== null) return 1; // b comes first, so a goes to the end
+                    // If b.endTime is null and a.endTime is not null, a comes first (1)
+                    if (b.endTime === null && a.endTime !== null) return -1; // a comes first, so b goes to the end
+
+                    // If both have endTime or both have null endTime, sort by their respective dates (endTime if present, else startDate)
+                    return dateB - dateA; // For descending order (most recent first)
+                  }).map((visit) => (
+                  <tr key={visit.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">{visit.id}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">{visit.clientId}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">{visit.petName}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        visit.visitType === 'Walk-In' ? 'bg-blue-100 text-blue-800' : 
+                        visit.visitType === 'Janji Temu' ? 'bg-green-100 text-green-800' : 
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {visit.visitType}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">{formatDateTime(visit.startTime)}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">{visit.endTime ? formatDateTime(visit.endTime) : "-"}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">
+                      <button 
+                        onClick={() => handleShowMedicalRecord(visit)}
+                        className="text-blue-600 hover:text-blue-800 inline-flex items-center"
+                      >
+                        <FaFileMedical className="mr-1" />
+                        <span>Rekam</span>
+                      </button>
+                    </td>
+                    {userRole === "front-desk" && (
+                      <td className="px-4 py-3 whitespace-nowrap text-sm space-x-2">
+                        <button 
+                          onClick={() => openModal('update', visit)}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button 
+                          onClick={() => openModal('delete', visit)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <FaTrash />
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Modals */}
+        {modals.showCreate && <VisitModal isCreate={true} />}
+        {modals.showUpdate && <VisitModal isCreate={false} />}
+        {modals.showDelete && <DeleteModal />}
+        {modals.showMedicalRecord && currentVisit.kunjungan && (
         <RekamMedisModal
-          isOpen={showMedicalRecordModal}
-          onClose={() => setShowMedicalRecordModal(false)}
-          onSubmit={handleSaveMedicalRecord}
-          existingData={medicalRecords[currentVisitId] || null}
-        />
-      )}
-    </div>
+          isOpen={modals.showMedicalRecord}
+          onClose={() => closeModal('medicalRecord')}
+          onSubmit={async (data) => {
+            setState(prev => ({
+              ...prev,
+              medicalRecords: {
+                ...prev.medicalRecords,
+                [currentVisit.currentVisitId]: data
+              }
+            }));
+            closeModal('medicalRecord');
+            }}
+            existingData={state.medicalRecords[currentVisit.currentVisitId]}
+            isLoading={state.isLoadingMedicalRecord}
+            id={currentVisit.kunjungan.id}
+            petName={currentVisit.kunjungan.petName}
+            clientId={currentVisit.kunjungan.clientId}
+            doctorId={currentVisit.kunjungan.doctorId}
+            nurseId={currentVisit.kunjungan.nurseId}
+            frontDeskId={currentVisit.kunjungan.frontDeskId}
+          />
+        )}
+      </div>
     </div>
   );
 }

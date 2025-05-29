@@ -41,9 +41,10 @@ export default function FrontDeskNavbar() {
 
           {/* Main Navigation */}
           <div className="hidden md:flex items-center space-x-8 h-10">
-            <NavLink href="" pathname={pathname} label="Dashboard" />
-            <NavLink href="" pathname={pathname} label="Daftar Klien" />
-            
+            <NavLink href="/dashboard-user" pathname={pathname} label="Dashboard" />
+            <NavLink href="/data-clients" pathname={pathname} label="Daftar Klien" />
+
+
             {/* Kelola Data Dropdown */}
             <div className="relative h-full flex items-center group">
               <Link
@@ -63,8 +64,8 @@ export default function FrontDeskNavbar() {
               {/* Dropdown Menu */}
               <div className="absolute top-full left-0 mt-0 w-56 bg-white rounded-b-md shadow-xl z-10 border-t-2 border-[#FD7E14] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                 <div className="py-2">
-                  <DropdownLink href="" label="Kelola Jenis Hewan" />
-                  <DropdownLink href="" label="Kelola Hewan Peliharaan" />
+                  <DropdownLink href="/jenis-hewan" label="Kelola Jenis Hewan" />
+                  <DropdownLink href="/hewan-peliharaan" label="Kelola Hewan Peliharaan" />
                   <DropdownLink href="/doctor/visits" label="Kelola Kunjungan" />
                 </div>
               </div>
@@ -75,7 +76,7 @@ export default function FrontDeskNavbar() {
           <div className="hidden md:flex items-center">
             <Link
               href="/logout"
-              className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              className="px-5 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
             >
               Logout
             </Link>
@@ -84,25 +85,28 @@ export default function FrontDeskNavbar() {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
           <div className="md:hidden flex flex-col space-y-4 mt-4">
-            <NavLink href="" pathname={pathname} label="Dashboard" />
-            <NavLink href="" pathname={pathname} label="Daftar Klien" />
+            <NavLink href="/dashboard-user" pathname={pathname} label="Dashboard" />
+            <NavLink href="/data-clients" pathname={pathname} label="Daftar Klien" />
+
             <div className="flex flex-col space-y-2">
               <Link href="/doctor/manage" className={`flex items-center px-1 ${pathname.startsWith('/doctor/manage') ? activeClass : inactiveClass}`}>
                 Kelola Data
               </Link>
               {/* Dropdown Menu expanded di mobile */}
               <div className="flex flex-col pl-4">
-                  <DropdownLink href="" label="Kelola Jenis Hewan" />
-                  <DropdownLink href="" label="Kelola Hewan Peliharaan" />
+                  <DropdownLink href="/jenis-hewan" label="Kelola Jenis Hewan" />
+                  <DropdownLink href="/hewan-peliharaan" label="Kelola Hewan Peliharaan" />
                   <DropdownLink href="/doctor/visits" label="Kelola Kunjungan" />
               </div>
             </div>
+            <div className="hidden md:flex items-center">
             <Link
               href="/logout"
-              className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              className="px-5 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
             >
               Logout
             </Link>
+          </div>
           </div>
         )}
       </div>

@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react'; // Tambahan untuk toggle hamburger menu
+import { useState } from 'react';
 
 export default function ClientNavbar() {
   const pathname = usePathname();
@@ -39,35 +39,36 @@ export default function ClientNavbar() {
             </button>
           </div>
 
-
           {/* Main Navigation */}
           <div className="hidden md:flex items-center space-x-8 h-10">
-            <NavLink href="/doctor" pathname={pathname} label="Dashboard" />
-            <NavLink href="/doctor/pet-types" pathname={pathname} label="Kelola Hewan Peliharaan" />
-            <NavLink href="/doctor/pet_treatments" pathname={pathname} label="Daftar Kunjungan" />
+            <NavLink href="/dashboard-user" pathname={pathname} label="Dashboard" />
+            <NavLink href="/hewan-peliharaan" pathname={pathname} label="Kelola Hewan Peliharaan" />
+            <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
+            <NavLink href="/vaccines-client" pathname={pathname} label="Daftar Vaksinasi" />
             </div>
             
             {/* Logout Button */}
             <div className="hidden md:flex items-center">
-              <Link
-                href="/logout"
-                className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
-              >
-                Logout
-              </Link>
-            </div>
+            <Link
+              href="/logout"
+              className="px-5 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
+            >
+              Logout
+            </Link>
+          </div>
           </div>
           
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden flex flex-col space-y-4 mt-4">
-            <NavLink href="/doctor" pathname={pathname} label="Dashboard" />
-            <NavLink href="/doctor/pet-types" pathname={pathname} label="Kelola Hewan Peliharaan" />
-            <NavLink href="/doctor/pet_treatments" pathname={pathname} label="Daftar Kunjungan" />
+            <NavLink href="/dashboard-user" pathname={pathname} label="Dashboard" />
+            <NavLink href="/hewan-peliharaan" pathname={pathname} label="Kelola Hewan Peliharaan" />
+            <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
+            <NavLink href="/vaccines-client" pathname={pathname} label="Daftar Vaksinasi" />
             <Link
               href="/logout"
-              className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              className="px-5 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
             >
               Logout
             </Link>

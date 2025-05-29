@@ -2,22 +2,50 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 export default function DeletePet() {
+  const { data: session, status } = useSession();
+  const role = session?.user?.role;
+
   const { key } = useParams();
   const [petName, setPetName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const router = useRouter();
 
   useEffect(() => {
-    // Dummy fetch by key
-    setPetName('Snowy');
-    setOwnerName('John Doe');
-  }, [key]);
+    if (role === 'front-desk' && key) {
+      const fetchPet = async () => {
+        const res = await fetch(`/api/hewan-peliharaan/${key}`);
+        if (res.ok) {
+          const data = await res.json();
+          setPetName(data.nama);
+          setOwnerName(data.no_identitas_klien);
+        }
+      };
+      fetchPet();
+    }
+  }, [role, key]);
 
-  const handleDelete = () => {
-    // TODO: DELETE /api/hewan-peliharaan/[key]
-    router.push('/hewan-peliharaan');
+  if (status === 'loading') {
+    return <div className="min-h-screen flex items-center justify-center">Loading…</div>;
+  }
+
+  if (role !== 'front-desk') {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500 font-semibold">
+        Forbidden: You do not have access to delete this pet.
+      </div>
+    );
+  }
+
+  const handleDelete = async () => {
+    try {
+      await fetch(`/api/hewan-peliharaan/${key}`, { method: 'DELETE' });
+      router.push('/hewan-peliharaan');
+    } catch (err) {
+      console.error('Delete error:', err);
+    }
   };
 
   return (
