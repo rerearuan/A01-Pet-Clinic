@@ -7,6 +7,9 @@ Aplikasi ini adalah sistem manajemen klinik hewan, yang menyediakan berbagai fit
 - Valentino Kim Fernando - 2306275771
 
 ---
+## Link Deploy
+Akses aplikasi secara online melalui link berikut:  
+[a01-pet-clinic](https://a01-pet-clinic.vercel.app/)
 
 ## Daftar Fitur 🔧
 
