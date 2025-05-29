@@ -656,7 +656,7 @@ export default function TreatmentManagement() {
                     dr. {formatEmailName(staffMembers.find(staff => staff.id === treatment.doctorId)?.email_user || treatment.doctorId)}
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    {availableTreatments.find(t => t.code === treatment.treatmentCode)?.name || treatment.treatmentCode}
+                    {treatment.treatmentCode} - {availableTreatments.find(t => t.code === treatment.treatmentCode)?.name || treatment.treatmentCode}
                   </td>
                   <td className="px-4 py-3 text-sm space-x-2">
                     {userRole === 'dokter-hewan' && <div className="flex flex-col w-24">
