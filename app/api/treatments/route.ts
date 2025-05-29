@@ -11,9 +11,9 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       data: result.rows.map(row => ({
-        kode_perawatan: row.kode_perawatan,
-        nama_perawatan: row.nama_perawatan,
-        biaya_perawatan: row.biaya_perawatan
+        code: row.kode_perawatan,
+        name: row.nama_perawatan,
+        cost: row.biaya_perawatan
       }))
     });
   } catch (error) {

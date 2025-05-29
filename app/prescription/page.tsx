@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 
 interface Treatment {
-  kode_perawatan: string;
-  nama_perawatan: string;
+  code: string;
+  name: string;
 }
 
 interface Medicine {
@@ -193,8 +193,8 @@ const PrescriptionPage = () => {
             >
               <option value="">Select Treatment</option>
               {treatments.map((treatment) => (
-                <option key={treatment.kode_perawatan} value={treatment.kode_perawatan}>
-                  {treatment.kode_perawatan} - {treatment.nama_perawatan}
+                <option key={treatment.code} value={treatment.code}>
+                  {treatment.code} - {treatment.name}
                 </option>
               ))}
             </select>
