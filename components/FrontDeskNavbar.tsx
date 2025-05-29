@@ -43,6 +43,7 @@ export default function FrontDeskNavbar() {
           <div className="hidden md:flex items-center space-x-8 h-10">
             <NavLink href="/dashboard-user" pathname={pathname} label="Dashboard" />
             <NavLink href="/data-clients" pathname={pathname} label="Daftar Klien" />
+            <NavLink href="/doctor/pet_treatments" pathname={pathname} label="Daftar Perawatan Hewan" />
 
 
             {/* Kelola Data Dropdown */}
@@ -87,7 +88,7 @@ export default function FrontDeskNavbar() {
           <div className="md:hidden flex flex-col space-y-4 mt-4">
             <NavLink href="/dashboard-user" pathname={pathname} label="Dashboard" />
             <NavLink href="/data-clients" pathname={pathname} label="Daftar Klien" />
-
+            <NavLink href="/doctor/pet_treatments" pathname={pathname} label="Daftar Perawatan Hewan" />
             <div className="flex flex-col space-y-2">
               <Link href="/doctor/manage" className={`flex items-center px-1 ${pathname.startsWith('/doctor/manage') ? activeClass : inactiveClass}`}>
                 Kelola Data

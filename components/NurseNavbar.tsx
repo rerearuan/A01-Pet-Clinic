@@ -42,6 +42,8 @@ export default function NurseNavbar() {
           {/* Main Navigation */}
           <div className="hidden md:flex items-center space-x-8 h-10">
             <NavLink href="/dashboard-user" pathname={pathname} label="Dashboard" />
+            <NavLink href="/doctor/pet_treatments" pathname={pathname} label="Daftar Perawatan Hewan" />
+            <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
             {/* Kelola Data Dropdown */}
             <div className="relative h-full flex items-center group">
               <Link
@@ -84,6 +86,8 @@ export default function NurseNavbar() {
         {isMobileMenuOpen && (
           <div className="md:hidden flex flex-col space-y-4 mt-4">
             <NavLink href="/dashboard-user" pathname={pathname} label="Dashboard" />
+            <NavLink href="/doctor/pet_treatments" pathname={pathname} label="Daftar Perawatan Hewan" />
+            <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
             <div className="flex flex-col space-y-2">
               <Link href="/doctor/manage" className={`flex items-center px-1 ${pathname.startsWith('/doctor/manage') ? activeClass : inactiveClass}`}>
                 Kelola Data

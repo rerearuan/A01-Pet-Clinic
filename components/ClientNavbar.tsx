@@ -46,6 +46,7 @@ export default function ClientNavbar() {
             <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
             <NavLink href="/vaccines-client" pathname={pathname} label="Daftar Vaksinasi" />
             <NavLink href="/detail-klien" pathname={pathname} label="Detail Data" />
+            <NavLink href="/doctor/pet_treatments" pathname={pathname} label="Daftar Perawatan Hewan" />
             </div>
             
             {/* Logout Button */}
@@ -68,6 +69,7 @@ export default function ClientNavbar() {
             <NavLink href="/doctor/visits" pathname={pathname} label="Daftar Kunjungan" />
             <NavLink href="/vaccines-client" pathname={pathname} label="Daftar Vaksinasi" />
             <NavLink href="/detail-klien" pathname={pathname} label="Detail Data" />
+            <NavLink href="/doctor/pet_treatments" pathname={pathname} label="Daftar Perawatan Hewan" />
             <Link
               href="/logout"
               className="px-5 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
