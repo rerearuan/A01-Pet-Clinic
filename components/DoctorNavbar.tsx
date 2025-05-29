@@ -75,10 +75,10 @@ export default function DoctorNavbar() {
           </div>
 
           {/* Logout Button */}
-          <div className="hidden md:flex items-center">
+        <div className="hidden md:flex items-center">
             <Link
-              href="/api/auth/signout"
-              className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              href="/logout"
+              className="px-5 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
             >
               Logout
             </Link>
@@ -105,8 +105,8 @@ export default function DoctorNavbar() {
               </div>
             </div>
             <Link
-              href="/api/auth/signout"
-              className="px-5 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              href="/logout"
+              className="px-5 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
             >
               Logout
             </Link>
