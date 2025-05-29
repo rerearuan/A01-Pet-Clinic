@@ -397,7 +397,7 @@ export default function TreatmentManagement() {
   };
   console.log('user id', id_user)
   console.log('doctorId pertama:', availableVisits.length > 0 ? availableVisits[0].doctorid : 'tidak ada data');
-  const filteredVisits = availableVisits.filter(visit => visit.doctorid === id_user);
+  const filteredVisits = availableVisits //.filter(visit => visit.doctorid === id_user);
   console.log('filter', filteredVisits)
   // Create/Update Modal Component
 
@@ -497,7 +497,7 @@ export default function TreatmentManagement() {
                   <option value="">Jenis Perawatan</option>
                   {availableTreatments.map((treatment) => (
                     <option key={treatment.code} value={treatment.code}>
-                      {treatment.name} {/* Tampilkan nama, tapi value-nya adalah kode */}
+                      {treatment.code} - {treatment.name} {/* Tampilkan nama, tapi value-nya adalah kode */}
                     </option>
                   ))}
                 </select>
@@ -620,9 +620,9 @@ export default function TreatmentManagement() {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Kode Treatment
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                { userRole==='dokter-hewan' && <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Action
-                </th>
+                </th>}
               </tr>
             </thead>
 
@@ -630,9 +630,9 @@ export default function TreatmentManagement() {
               {treatments.filter(treatment => {
                 if (userRole === "front-desk") return true;
 
-                if (userRole === "dokter-hewan") return treatment.doctorId === id_user;
+                if (userRole === "dokter-hewan") return true;
 
-                if (userRole === "perawat-hewan") return treatment.nurseId === id_user;
+                if (userRole === "perawat-hewan") return true;
 
                 if (userRole === "individu" || userRole === "perusahaan") return treatment.clientId === id_user;
 
@@ -656,7 +656,7 @@ export default function TreatmentManagement() {
                     dr. {formatEmailName(staffMembers.find(staff => staff.id === treatment.doctorId)?.email_user || treatment.doctorId)}
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    {availableTreatments.find(t => t.code === treatment.treatmentCode)?.name || treatment.treatmentCode}
+                    {treatment.treatmentCode} - {availableTreatments.find(t => t.code === treatment.treatmentCode)?.name || treatment.treatmentCode}
                   </td>
                   <td className="px-4 py-3 text-sm space-x-2">
                     {userRole === 'dokter-hewan' && <div className="flex flex-col w-24">

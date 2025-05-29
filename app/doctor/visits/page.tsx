@@ -64,14 +64,14 @@ interface AppState {
 export default function VisitPage() {
   const { data: session, status } = useSession();
   const userRole = session?.user?.role;
-  
+
   // State management
   const [state, setState] = useState<AppState>({
     visits: [],
     medicalRecords: {},
     userEmails: [],
     klienList: [],
-    hewanList: [],
+    hewanList: [], // Perbaikan: Ganti nama state agar tidak bentrok
     loading: true,
     loadingUsers: false,
     isLoadingMedicalRecord: false,
@@ -109,7 +109,7 @@ export default function VisitPage() {
     const fetchInitialData = async () => {
       try {
         setState(prev => ({ ...prev, loading: true }));
-        
+
         const [visitsResponse, staffResponse, klienResponse, hewanResponse] = await Promise.all([
           fetch('/api/visits/get-or-post-visit'),
           fetch('/api/visits/get_staff'),
@@ -133,7 +133,7 @@ export default function VisitPage() {
           visits: visitsData.data,
           userEmails: staffData.data,
           klienList: klienData.data,
-          hewanList: hewanData.data,
+          hewanList: hewanData.data, // Perbaikan: Sesuaikan dengan nama state baru
           loading: false
         }));
       } catch (error) {
@@ -158,26 +158,26 @@ export default function VisitPage() {
   };
 
   const get_id_klien = (email: string | null | undefined, state: AppState): string | null => {
-    if (!email) return null;  // Handle null/undefined case
+    if (!email) return null;
     if (!state.klienList) return null;
     const client = state.klienList.find(klien => klien.email === email);
     return client ? client.no_identitas : null;
   };
 
   const get_id_pegawai = (email: string | null | undefined, state: AppState): string | null => {
-    if (!email) return null;  // Handle null/undefined case
+    if (!email) return null;
     if (!state.userEmails) return null;
     const staff = state.userEmails.find(member => member.email_user === email);
     return staff ? staff.id : null;
   };
 
-// Usage
+  // Usage
   const id_user = get_id_klien(session?.user.email, state) || get_id_pegawai(session?.user.email, state);
 
   const getPetOptions = (clientId: string) => {
     if (!clientId) return [];
-    
-    return state.hewanList
+
+    return state.hewanList // Perbaikan: Sesuaikan dengan nama state baru
       .filter((hewan: Hewan) => hewan.no_identitas_klien === clientId)
       .map((hewan: Hewan) => ({
         value: hewan.nama,
@@ -202,7 +202,7 @@ export default function VisitPage() {
       });
 
       const data = await res.json();
-      
+
       if (data.success) {
         setState(prev => ({
           ...prev,
@@ -228,57 +228,55 @@ export default function VisitPage() {
   };
 
   const handleCreate = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  try {
-    const payload = {
-      clientId: form.clientId,
-      petName: form.petName,
-      visitType: form.visitType,
-      startTime: new Date(form.startTime).toISOString(),
-      endTime: form.endTime ? new Date(form.endTime).toISOString() : null,
-      frontDeskId: form.frontDeskId,
-      nurseId: form.nurseId,
-      doctorId: form.doctorId
-    };
+    e.preventDefault();
 
-    const response = await fetch('/api/visits/get-or-post-visit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    try {
+      const payload = {
+        clientId: form.clientId,
+        petName: form.petName,
+        visitType: form.visitType,
+        startTime: new Date(form.startTime).toISOString(),
+        endTime: form.endTime ? new Date(form.endTime).toISOString() : null,
+        frontDeskId: form.frontDeskId,
+        nurseId: form.nurseId,
+        doctorId: form.doctorId
+      };
 
-    const data = await response.json();
-    
-    if (data.success) {
-      setState(prev => ({
-        ...prev,
-        visits: [...prev.visits, {
-          ...data.data,
-        }]
-      }));
-      
-      closeModal('create');
-      resetForm();
-      setError(null);
-      // update state lain dan tutup modal
-    } else {
-      // langsung set error biar muncul
-      setError(data.message || 'Terjadi kesalahan');
+      const response = await fetch('/api/visits/get-or-post-visit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setState(prev => ({
+          ...prev,
+          visits: [...prev.visits, {
+            ...data.data,
+          }]
+        }));
+
+        closeModal('create');
+        resetForm();
+        setError(null);
+      } else {
+        setError(data.message || 'Terjadi kesalahan');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Terjadi kesalahan saat memproses permintaan';
+
+      setState(prev => ({ ...prev, error: errorMessage }));
     }
-  } catch (error) {
-    const errorMessage = error instanceof Error 
-      ? error.message 
-      : 'Terjadi kesalahan saat memproses permintaan';
-    
-    setState(prev => ({ ...prev, error: errorMessage }));
-  }
-};
+  };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentVisit.kunjungan) return;
-    
+
     try {
       // Format payload dengan DateTime yang benar
       const payload = {
@@ -300,69 +298,69 @@ export default function VisitPage() {
       });
 
       const data = await response.json();
-      
+
       // Update state dengan data terbaru
-      if(data.success){
-      const updatedVisits = state.visits.map(v => 
-        v.id === currentVisit.kunjungan?.id ? { 
-          ...v,
-          ...form,
-          startTime: data.data.startTime || data.data.timestamp_awal,
-          endTime: data.data.endTime || data.data.timestamp_akhir
-        } : v
-      );
-      
-      setState(prev => ({ ...prev, visits: updatedVisits }));
-      closeModal('update');
-      resetForm();
-      setError(null);
-    } else {
+      if (data.success) {
+        const updatedVisits = state.visits.map(v =>
+          v.id === currentVisit.kunjungan?.id ? {
+            ...v,
+            ...form,
+            startTime: data.data.startTime || data.data.timestamp_awal,
+            endTime: data.data.endTime || data.data.timestamp_akhir
+          } : v
+        );
+
+        setState(prev => ({ ...prev, visits: updatedVisits }));
+        closeModal('update');
+        resetForm();
+        setError(null);
+      } else {
         console.log("error:", data.message)
         setError(data.message);
 
-    }
-      } catch (error) {
-        const errorMessage = error instanceof Error 
-          ? error.message 
-          : 'Terjadi kesalahan saat memproses permintaan';
-        
-        setState(prev => ({ ...prev, error: errorMessage }));
       }
-    };
+    } catch (error) {
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Terjadi kesalahan saat memproses permintaan';
+
+      setState(prev => ({ ...prev, error: errorMessage }));
+    }
+  };
 
   const handleDelete = async () => {
-  if (!currentVisit.idToDelete) return;
+    if (!currentVisit.idToDelete) return;
 
-  try {
-    const response = await fetch(`/api/visits/delete/${currentVisit.idToDelete}`, {
-      method: 'DELETE'
-    });
+    try {
+      const response = await fetch(`/api/visits/delete/${currentVisit.idToDelete}`, {
+        method: 'DELETE'
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!data.success) {
-      throw new Error(data.message || 'Failed to delete visit');
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to delete visit');
+      }
+
+      // Update state setelah delete berhasil
+      setState(prev => ({
+        ...prev,
+        visits: prev.visits.filter(v => v.id !== currentVisit.idToDelete)
+      }));
+
+      closeModal('delete');
+    } catch (error) {
+      console.error("Delete error:", error);
+      setState(prev => ({
+        ...prev,
+        error: error instanceof Error ? error.message : 'Failed to delete visit'
+      }));
     }
-
-    // Update state setelah delete berhasil
-    setState(prev => ({
-      ...prev,
-      visits: prev.visits.filter(v => v.id !== currentVisit.idToDelete)
-    }));
-
-    closeModal('delete');
-  } catch (error) {
-    console.error("Delete error:", error);
-    setState(prev => ({
-      ...prev,
-      error: error instanceof Error ? error.message : 'Failed to delete visit'
-    }));
-  }
-};
+  };
 
   const handleShowMedicalRecord = async (kunjungan: Kunjungan) => {
     setCurrentVisit(prev => ({ ...prev, kunjungan }));
-    
+
     await fetchMedicalRecord(kunjungan.id, {
       nama_hewan: kunjungan.petName,
       no_identitas_klien: kunjungan.clientId,
@@ -376,30 +374,30 @@ export default function VisitPage() {
   };
 
   // Helper functions untuk format tanggal/waktu
-const formatDateTime = (dateString: string) => {
-  if (!dateString) return '-';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return 'Invalid Date';
-  
-  return date.toLocaleString('id-ID', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-};
+  const formatDateTime = (dateString: string) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid Date';
 
-const formatDateTimeForInput = (dateString: string) => {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return '';
-  
-  // Kompensasi timezone offset
-  const offset = date.getTimezoneOffset() * 60000;
-  const localISOTime = new Date(date.getTime() - offset).toISOString();
-  return localISOTime.slice(0, 16);
-};
+    return date.toLocaleString('id-ID', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatDateTimeForInput = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+
+    // Kompensasi timezone offset
+    const offset = date.getTimezoneOffset() * 60000;
+    const localISOTime = new Date(date.getTime() - offset).toISOString();
+    return localISOTime.slice(0, 16);
+  };
 
   const resetForm = () => {
     setForm({
@@ -415,8 +413,8 @@ const formatDateTimeForInput = (dateString: string) => {
   };
 
   const openModal = (type: 'create' | 'update' | 'delete', kunjungan?: Kunjungan) => {
-  if (type === 'create') {
-    resetForm();
+    if (type === 'create') {
+      resetForm();
     } else if (type === 'update' && kunjungan) {
       setCurrentVisit(prev => ({ ...prev, kunjungan }));
       setForm({
@@ -430,13 +428,13 @@ const formatDateTimeForInput = (dateString: string) => {
         doctorId: kunjungan.doctorId
       });
     } else if (type === 'delete' && kunjungan) {
-         setCurrentVisit(prev => ({ 
-          ...prev, 
-          idToDelete: kunjungan.id,
-          kunjungan
-        }));
-          }
-    
+      setCurrentVisit(prev => ({
+        ...prev,
+        idToDelete: kunjungan.id,
+        kunjungan
+      }));
+    }
+
     setModals(prev => ({ ...prev, [`show${type.charAt(0).toUpperCase() + type.slice(1)}`]: true }));
   };
 
@@ -448,54 +446,64 @@ const formatDateTimeForInput = (dateString: string) => {
     return state.userEmails.filter(user => user.role === role);
   };
 
-  const StaffSelect = ({ role, value, onChange }: {
+  const StaffSelect = ({ role, value, onChange, isCreateModal }: { // isCreateModal ditambahkan
     role: StaffRole;
     value: string;
-    disable:boolean;
     onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+    isCreateModal: boolean; // Prop baru untuk membedakan create/update modal
   }) => {
     const { data: session } = useSession();
-    
-    // Only run once when component mounts
+    const staffOptions = getStaffByRole(role);
+    const isCurrentUserFrontDesk = session?.user.role === 'front-desk';
+    const currentUserId = id_user;
+
+    // Tentukan apakah field ini harus read-only dan/atau diisi otomatis
+    const shouldBeReadonly =
+      (isCreateModal && role === 'front_desk' && isCurrentUserFrontDesk) || // Saat create, jika user front-desk, isi otomatis & readonly
+      (!isCreateModal && role === 'front_desk'); // Saat update, field front-desk selalu readonly
+
+    // Logika untuk mengisi otomatis frontDeskId saat create oleh user front-desk
     useEffect(() => {
-      if (role === 'front_desk' && 
-          session?.user.role === 'front-desk' && 
-          value !== id_user) {
+      if (isCreateModal && role === 'front_desk' && isCurrentUserFrontDesk && value !== currentUserId) {
         onChange({
           target: {
             name: 'frontDeskId',
-            value: id_user || ''
+            value: currentUserId || ''
           }
         } as React.ChangeEvent<HTMLSelectElement>);
       }
-  }, [role, session?.user.role, id_user]);
+    }, [isCreateModal, role, isCurrentUserFrontDesk, currentUserId, value, onChange]);
 
-    const isCurrentUserField = role === 'front_desk' && session?.user.role === 'front-desk';
-    const staffOptions = getStaffByRole(role);
+    // Tentukan nilai yang akan ditampilkan di field read-only
+    const displayValue = shouldBeReadonly
+      ? (role === 'front_desk' && isCreateModal && isCurrentUserFrontDesk)
+        ? state.userEmails.find(u => u.id === currentUserId)?.email_user || 'Memuat...' // Saat create, tampilkan email user yg login
+        : state.userEmails.find(u => u.id === value)?.email_user || value || 'N/A' // Saat update, tampilkan email dari nilai yg ada
+      : ''; // Tidak relevan untuk dropdown biasa
 
     return (
       <div className="mb-4">
         <label htmlFor={`${role}-select`} className="block text-sm font-medium text-gray-700 mb-1">
           {role === 'front_desk' ? 'Front Desk' : role === 'dokter_hewan' ? 'Dokter' : 'Perawat'}
         </label>
-        
-        {isCurrentUserField ? (
-          // Display as read-only field for current front-desk user
-          <div className="p-2 bg-gray-100 rounded-md">
-            {session.user.email} (Current User)
-            <input 
-              type="hidden" 
-              name="frontDeskId" 
-              value={id_user || ''} 
+
+        {shouldBeReadonly ? (
+          // Jika read-only, tampilkan sebagai div biasa dengan input hidden
+          <div className="p-2 bg-gray-100 rounded-md text-gray-800">
+            {displayValue}
+            <input
+              type="hidden"
+              name={role === 'front_desk' ? 'frontDeskId' : role === 'dokter_hewan' ? 'doctorId' : 'nurseId'}
+              value={value || ''}
             />
           </div>
         ) : (
-          // Regular select dropdown for other cases
+          // Jika tidak read-only, tampilkan sebagai select dropdown
           <select
             id={`${role}-select`}
-            name={role === 'front_desk' ? 'frontDeskId' : 
-                  role === 'dokter_hewan' ? 'doctorId' : 'nurseId'}
-            value={isCurrentUserField ? id_user || '' : value}
+            name={role === 'front_desk' ? 'frontDeskId' :
+              role === 'dokter_hewan' ? 'doctorId' : 'nurseId'}
+            value={value}
             onChange={onChange}
             className="w-full p-2 border border-gray-300 rounded-md"
             required
@@ -522,7 +530,7 @@ const formatDateTimeForInput = (dateString: string) => {
           <h2 className="text-xl font-semibold">
             {isCreate ? 'Buat Kunjungan Baru' : 'Edit Kunjungan'}
           </h2>
-          <button 
+          <button
             onClick={() => closeModal(isCreate ? 'create' : 'update')}
             className="text-gray-500 hover:text-gray-700"
           >
@@ -530,12 +538,12 @@ const formatDateTimeForInput = (dateString: string) => {
           </button>
         </div>
 
-         {error &&  (
-            <ErrorDisplay
-              error={error}
-              onClose={() => setError(null)}
-            />
-          )}
+        {error && (
+          <ErrorDisplay
+            error={error}
+            onClose={() => setError(null)}
+          />
+        )}
 
         <form onSubmit={isCreate ? handleCreate : handleUpdate}>
           {/* Client ID */}
@@ -605,11 +613,11 @@ const formatDateTimeForInput = (dateString: string) => {
             </select>
           </div>
 
-          {/* Staff Selection */}
-          <StaffSelect role="front_desk" value={form.frontDeskId} onChange={handleFormChange} disable={userRole === 'front-desk'}/>
-          <StaffSelect role="perawat_hewan" value={form.nurseId} onChange={handleFormChange} disable={false} />
-          <StaffSelect role="dokter_hewan" value={form.doctorId} onChange={handleFormChange} disable={false} />
-          
+          {/* Staff Selection: Pass isCreateModal prop */}
+          <StaffSelect role="front_desk" value={form.frontDeskId} onChange={handleFormChange} isCreateModal={isCreate} />
+          <StaffSelect role="perawat_hewan" value={form.nurseId} onChange={handleFormChange} isCreateModal={isCreate} />
+          <StaffSelect role="dokter_hewan" value={form.doctorId} onChange={handleFormChange} isCreateModal={isCreate} />
+
 
           {/* Time Selection */}
           <div className="mb-4">
@@ -666,7 +674,7 @@ const formatDateTimeForInput = (dateString: string) => {
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Hapus Kunjungan</h2>
-          <button 
+          <button
             onClick={() => closeModal('delete')}
             className="text-gray-500 hover:text-gray-700"
           >
@@ -703,7 +711,7 @@ const formatDateTimeForInput = (dateString: string) => {
       <div className="bg-white bg-opacity-90 rounded-lg p-6 shadow-md">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">List Kunjungan</h1>
-          {userRole==='front-desk' && <button
+          {userRole === 'front-desk' && <button
             onClick={() => openModal('create')}
             className="bg-[#FD7E14] hover:bg-[#E67112] text-white px-4 py-2 rounded-md"
           >
@@ -734,35 +742,25 @@ const formatDateTimeForInput = (dateString: string) => {
               </thead>
               <tbody>
                 {state.visits.filter(visit => {
-                    if (userRole === "front-desk") return true;
-                    
-                    // Jika doctor, tampilkan hanya kunjungan yang ditangani doctor ini
-                    if (userRole === "dokter-hewan") return visit.doctorId === id_user;
+                  if (userRole === "front-desk") return true;
 
-                    if (userRole === "perawat-hewan") return visit.nurseId === id_user;
-                    
-                    // Jika client, tampilkan hanya kunjungan milik client ini
-                    if (userRole === "individu" || userRole === "perusahaan" ) return visit.clientId === id_user;
-                    
-                    return false;
-                  }).sort((a, b) => {
-                    // Convert dates to a comparable format (e.g., milliseconds since epoch)
-                    const dateA = a.endTime ? new Date(a.endTime).getTime() : new Date(a.startTime).getTime();
-                    const dateB = b.endTime ? new Date(b.endTime).getTime() : new Date(b.startTime).getTime();
+                  // Jika doctor, tampilkan hanya kunjungan yang ditangani doctor ini
+                  if (userRole === "dokter-hewan") return true;
 
-                    // Handle null/undefined end dates:
-                    // If both have endTime, sort by endTime
-                    // If one has endTime and the other doesn't, the one with endTime comes first (unless we want nulls last)
-                    // If neither has endTime, sort by startDate
+                  if (userRole === "perawat-hewan") return true;
 
-                    // For sorting with nulls last:
-                    // If a.endTime is null and b.endTime is not null, b comes first (-1)
-                    if (a.endTime === null && b.endTime !== null) return 1; // b comes first, so a goes to the end
-                    // If b.endTime is null and a.endTime is not null, a comes first (1)
-                    if (b.endTime === null && a.endTime !== null) return -1; // a comes first, so b goes to the end
+                  // Jika client, tampilkan hanya kunjungan milik client ini
+                  if (userRole === "individu" || userRole === "perusahaan") return visit.clientId === id_user;
 
-                    // If both have endTime or both have null endTime, sort by their respective dates (endTime if present, else startDate)
-                    return dateB - dateA; // For descending order (most recent first)
+                  return false;
+                }).sort((a, b) => {
+                    // Convert startTime to a comparable format (milliseconds since epoch)
+                    // Tidak perlu lagi memeriksa endTime, cukup startTime saja
+                    const dateA = new Date(a.startTime).getTime();
+                    const dateB = new Date(b.startTime).getTime();
+
+                    // Urutkan dari yang terbaru ke yang terlama (descending)
+                    return dateB - dateA;
                   }).map((visit) => (
                   <tr key={visit.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 whitespace-nowrap text-sm">{visit.id}</td>
@@ -770,17 +768,17 @@ const formatDateTimeForInput = (dateString: string) => {
                     <td className="px-4 py-3 whitespace-nowrap text-sm">{visit.petName}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        visit.visitType === 'Walk-In' ? 'bg-blue-100 text-blue-800' : 
-                        visit.visitType === 'Janji Temu' ? 'bg-green-100 text-green-800' : 
-                        'bg-red-100 text-red-800'
-                      }`}>
+                        visit.visitType === 'Walk-In' ? 'bg-blue-100 text-blue-800' :
+                          visit.visitType === 'Janji Temu' ? 'bg-green-100 text-green-800' :
+                            'bg-red-100 text-red-800'
+                        }`}>
                         {visit.visitType}
                       </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm">{formatDateTime(visit.startTime)}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm">{visit.endTime ? formatDateTime(visit.endTime) : "-"}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm">
-                      <button 
+                      <button
                         onClick={() => handleShowMedicalRecord(visit)}
                         className="text-blue-600 hover:text-blue-800 inline-flex items-center"
                       >
@@ -790,13 +788,13 @@ const formatDateTimeForInput = (dateString: string) => {
                     </td>
                     {userRole === "front-desk" && (
                       <td className="px-4 py-3 whitespace-nowrap text-sm space-x-2">
-                        <button 
+                        <button
                           onClick={() => openModal('update', visit)}
                           className="text-blue-600 hover:text-blue-800"
                         >
                           <FaEdit />
                         </button>
-                        <button 
+                        <button
                           onClick={() => openModal('delete', visit)}
                           className="text-red-600 hover:text-red-800"
                         >
@@ -816,18 +814,18 @@ const formatDateTimeForInput = (dateString: string) => {
         {modals.showUpdate && <VisitModal isCreate={false} />}
         {modals.showDelete && <DeleteModal />}
         {modals.showMedicalRecord && currentVisit.kunjungan && (
-        <RekamMedisModal
-          isOpen={modals.showMedicalRecord}
-          onClose={() => closeModal('medicalRecord')}
-          onSubmit={async (data) => {
-            setState(prev => ({
-              ...prev,
-              medicalRecords: {
-                ...prev.medicalRecords,
-                [currentVisit.currentVisitId]: data
-              }
-            }));
-            closeModal('medicalRecord');
+          <RekamMedisModal
+            isOpen={modals.showMedicalRecord}
+            onClose={() => closeModal('medicalRecord')}
+            onSubmit={async (data) => {
+              setState(prev => ({
+                ...prev,
+                medicalRecords: {
+                  ...prev.medicalRecords,
+                  [currentVisit.currentVisitId]: data
+                }
+              }));
+              closeModal('medicalRecord');
             }}
             existingData={state.medicalRecords[currentVisit.currentVisitId]}
             isLoading={state.isLoadingMedicalRecord}
